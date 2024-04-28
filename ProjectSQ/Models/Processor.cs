@@ -1,4 +1,6 @@
-﻿namespace ProjectSQ.Models
+﻿using System.Numerics;
+
+namespace ProjectSQ.Models
 {
     public static class Processor
     {

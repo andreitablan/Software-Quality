@@ -45,10 +45,36 @@ namespace ProjectSQ.Services
             if (Processor.registerDictionary[reg1] == Processor.registerDictionary[reg2])
             {
                 Processor.Equal = true;
+                Processor.LessEqual = true;
+                Processor.GreaterEqual = true;
+
+                Processor.NotEqual = false;
+                Processor.Less = false;
+                Processor.Greater = false;
+            }
+            else if (Processor.registerDictionary[reg1] < Processor.registerDictionary[reg2])
+            {
+                Processor.Equal = false;
+                Processor.LessEqual = false;
+                Processor.GreaterEqual = false;
+
+                Processor.NotEqual = true;
+                Processor.Less = true;
+                Processor.Greater = false;
+            }
+            else if (Processor.registerDictionary[reg1] > Processor.registerDictionary[reg2])
+            {
+                Processor.Equal = false;
+                Processor.LessEqual = false;
+                Processor.GreaterEqual = false;
+
+                Processor.NotEqual = true;
+                Processor.Less = false;
+                Processor.Greater = true;
             }
             else
             {
-                Processor.Equal = false;
+                Console.Write("Error: Other case in Compare function");
             }
             throw new NotImplementedException();
         }
@@ -74,6 +100,39 @@ namespace ProjectSQ.Services
         {
             throw new NotImplementedException();
         }
+
+        #region poate nu ne trebuie toate astea
+        public void JumpIfEqual(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void JumpIfGreaterThan(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void JumpIfGreaterThanOrEqual(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void JumpIfLessThan(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void JumpIfLessThanOrEqual(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void JumpIfNotEqual(string label)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion 
+
 
         public void Multiplication(string reg1, string reg2)
         {
