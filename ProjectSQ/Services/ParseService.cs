@@ -27,19 +27,5 @@ namespace ProjectSQ.Services
                 Console.WriteLine($"The file '{file}' does not exist.");
             }
         }
-        public void Assignment(string operand1, string operand2)
-        {
-            //ambii operanzi registri
-            if (Processor.registerDictionary.ContainsKey(operand1) && Processor.registerDictionary.ContainsKey(operand2))
-            {
-                new ProcessorService().Assignment(operand1, operand2);
-                return;
-            }    
-            if (Processor.registerDictionary.ContainsKey(operand1))
-            {
-
-            }
-            if (Pro.ContainsKey(operand1))
-        }
     }
 }

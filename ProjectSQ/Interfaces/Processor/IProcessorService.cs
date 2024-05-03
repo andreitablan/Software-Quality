@@ -1,11 +1,12 @@
 ﻿namespace ProjectSQ.Interfaces.Processor
 {
-    public interface IProcessorService : IAssignment
+    public interface IProcessorService
     {
         void ExecuteFile();
+        bool Assignment(string operandOne, string operandTwo);
+
         // Arithmetic Operations
-        void Addition(string reg1, string reg2);
-        void Addition(string reg1, short val);
+        bool Addition(string operandOne, string operandTwo);
         void Subtraction(string reg1, string reg2);
         void Subtraction(string reg1, short val);
         void Multiplication(string reg1, string reg2);

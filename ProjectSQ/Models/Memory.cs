@@ -6,7 +6,7 @@ namespace ProjectSQ.Models
     {
         public static int currentInstruction = 0;
         public static string[] internalMemory = new string[1024];
-        public static int[] programData = new int[65536];//0->60.000 mem, restul stack
+        public static short[] programData = new short[65536];//0->60.000 mem, restul stack
 
 
         //program's configuration file
