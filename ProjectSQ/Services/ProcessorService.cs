@@ -1,12 +1,62 @@
-﻿using ProjectSQ.Interfaces;
+﻿using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
 
 namespace ProjectSQ.Services
 {
     public class ProcessorService : IProcessorService
     {
-        private string currentInstruction; // Represents the current instruction being executed
+        public void ExecuteFile()
+        {
+            while (Memory.currentInstruction < Memory.internalMemory.Length)
+            {
+                string instruction = Memory.internalMemory[Memory.currentInstruction++];
+                string[] words = instruction.Split(' ');
+                string operation = words[0];
+                switch (operation)
+                {
+                    case "mov":
+                        string[] operands = words[1].Split(",");
+                        new ParseService().Assignment(operands[0], operands[1]);
+                        break;
 
+                    case "add":
+                        break;
+                    case "sub":
+                        break;
+                    case "mul":
+                        break;
+                    case "div":
+                        break;
+
+                    case "and":
+                        break;
+                    case "or":
+                        break;
+                    case "xor":
+                        break;
+                    case "not":
+                        break;
+                    case "shr":
+                        break;
+                    case "shl":
+                        break;
+
+                    case "jmp":
+                        break;
+
+                }
+            }
+        }
+
+        public void Assignment(string reg1, string reg2)
+        {
+            Processor.registerDictionary[reg1] = Processor.registerDictionary[reg2];
+        }
+
+        public void Assignment(string reg1, short val)
+        {
+            Processor.registerDictionary[reg1] = val;
+        }
 
         public void Addition(string reg1, string reg2)
         {
@@ -14,7 +64,7 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Addition(string reg1, int val)
+        public void Addition(string reg1, short val)
         {
             Processor.registerDictionary[reg1] += val;
             throw new NotImplementedException();
@@ -23,18 +73,6 @@ namespace ProjectSQ.Services
         public void And(string reg1, string reg2)
         {
             Processor.registerDictionary[reg1] &= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
-        public void Assignment(string reg1, string reg2)
-        {
-            Processor.registerDictionary[reg1] = Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
-        public void Assignment(string reg1, int val)
-        {
-            Processor.registerDictionary[reg1] = val;
             throw new NotImplementedException();
         }
 
@@ -81,7 +119,7 @@ namespace ProjectSQ.Services
             }
         }
 
-        public void Compare(string reg1, int val)
+        public void Compare(string reg1, short val)
         {
             if (Processor.registerDictionary[reg1] == val)
             {
@@ -125,7 +163,7 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Division(string reg1, int val)
+        public void Division(string reg1, short val)
         {
             Processor.registerDictionary[reg1] /= val;
             throw new NotImplementedException();
@@ -182,7 +220,7 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Multiplication(string reg1, int val)
+        public void Multiplication(string reg1, short val)
         {
             Processor.registerDictionary[reg1] *= val;
             throw new NotImplementedException();
@@ -220,7 +258,7 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Shift(string reg1, int val)
+        public void Shift(string reg1, short val)
         {
             Processor.registerDictionary[reg1] <<= val;
             throw new NotImplementedException();
@@ -238,7 +276,7 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Subtraction(string reg1, int val)
+        public void Subtraction(string reg1, short val)
         {
             Processor.registerDictionary[reg1] -= val;
             throw new NotImplementedException();
