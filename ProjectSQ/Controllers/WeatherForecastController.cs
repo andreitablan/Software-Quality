@@ -25,7 +25,7 @@ namespace ProjectSQ.Controllers
             var parser = new ParseService(); 
             var processor = new ProcessorService();
 
-            parser.LoadInstructions("C:\\GitHub\\Software-Quality\\ProjectSQ\\Utils\\input.txt");
+            parser.LoadInstructions("ProjectSQ.Utils.input.txt");
             processor.ExecuteFile();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

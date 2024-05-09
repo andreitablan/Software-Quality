@@ -1,5 +1,6 @@
 ﻿using ProjectSQ.Interfaces.Parser;
 using ProjectSQ.Models;
+using System.Reflection;
 
 namespace ProjectSQ.Services
 {
@@ -7,25 +8,28 @@ namespace ProjectSQ.Services
     {
         public void LoadInstructions(string file)
         {
-            if (File.Exists(file))
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            using (Stream stream = assembly.GetManifestResourceStream(file))
             {
-                try
+                if (stream == null)
                 {
-                    string[] lines = File.ReadAllLines(file);
-                    Memory.instructionNumber = lines.Length;
-                    for (int i = 0; i < lines.Length; i++)
+                    Console.WriteLine("Resource not found.");
+                    return;
+                }
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string line;
+                    var index = 0;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        Memory.internalMemory[i] = lines[i];
+                        Memory.internalMemory[index] = line;
+                        index++;
                     }
+                    Memory.instructionNumber = index-1;
+
                 }
-                catch (IOException e)
-                {
-                    Console.WriteLine($"An error occurred while reading the file: {e.Message}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"The file '{file}' does not exist.");
             }
         }
     }
