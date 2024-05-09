@@ -23,8 +23,7 @@
         void Shift(string reg1, string reg2);
 
         // Comparison
-        void Compare(string reg1, string reg2);
-        void Compare(string reg1, short val);
+        public bool Compare(string operandOne, string operandTwo);
 
         // Jump Operations
         void Jump(string label);

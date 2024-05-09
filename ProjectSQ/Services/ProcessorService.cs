@@ -9,7 +9,7 @@ namespace ProjectSQ.Services
         public void ExecuteFile()
         {
             bool isInputFileGood = true;
-            while (Memory.currentInstruction < Memory.internalMemory.Length && isInputFileGood)
+            while (Memory.currentInstruction < Memory.instructionNumber && isInputFileGood)
             {
                 string instruction = Memory.internalMemory[Memory.currentInstruction++];
                 string[] words = instruction.Split(' ');
@@ -98,14 +98,24 @@ namespace ProjectSQ.Services
                     if (DigitsOnlyRegex().IsMatch(operandTwo))
                     {
                         Memory.programData[index] = short.Parse(operandTwo);
-                        return false;
+                        return true;
                     }
 
                     //memory location and data register
                     if (Processor.registerDictionary.ContainsKey(operandTwo))
                     {
                         Memory.programData[index] = Processor.registerDictionary[operandTwo];
-                        return false;
+                        return true;
+                    }
+                    //memory location and memory location
+                    if (operandTwo.Contains("mem["))
+                    {
+                        int indexTwo = GetMemoryIndex(operandTwo);
+                        if(indexTwo != -1)
+                        {
+                            Memory.programData[index] = Memory.programData[indexTwo];
+                            return true;
+                        }
                     }
                 }
             }
@@ -159,14 +169,24 @@ namespace ProjectSQ.Services
                     if (DigitsOnlyRegex().IsMatch(operandTwo))
                     {
                         Memory.programData[index] += short.Parse(operandTwo);
-                        return false;
+                        return true;
                     }
 
                     //memory location and data register
                     if (Processor.registerDictionary.ContainsKey(operandTwo))
                     {
                         Memory.programData[index] += Processor.registerDictionary[operandTwo];
-                        return false;
+                        return true;
+                    }
+                    //memory location and memory location
+                    if (operandTwo.Contains("mem["))
+                    {
+                        int indexTwo = GetMemoryIndex(operandTwo);
+                        if (indexTwo != -1)
+                        {
+                            Memory.programData[index] += Memory.programData[indexTwo];
+                            return true;
+                        }
                     }
                 }
             }
@@ -185,80 +205,105 @@ namespace ProjectSQ.Services
             throw new NotImplementedException();
         }
 
-        public void Compare(string reg1, string reg2)
+        public bool Compare(string operandOne, string operandTwo)
         {
-            if (Processor.registerDictionary[reg1] == Processor.registerDictionary[reg2])
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
             {
-                Processor.Equal = true;
-                Processor.LessEqual = true;
-                Processor.GreaterEqual = true;
+                //both operands are data register (cmp reg1,reg2)
+                if (Processor.registerDictionary.ContainsKey(operandTwo))
+                {
+                    SetCompareFlags(Processor.registerDictionary[operandOne], Processor.registerDictionary[operandTwo]);
+                    return true;
+                }
+                //data register and constant value (cmp reg1,2)
+                if (DigitsOnlyRegex().IsMatch(operandTwo))
+                {
+                    short value = short.Parse(operandTwo);
+                    SetCompareFlags(Processor.registerDictionary[operandOne], value);
+                    return true;
+                }
+                //data register and memory location (cmp reg1, mem[index])
+                if (operandTwo.Contains("mem["))
+                {
+                    int index = GetMemoryIndex(operandTwo);
+                    if (index != -1)
+                    {
+                        SetCompareFlags(Processor.registerDictionary[operandOne], Memory.programData[index]);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            //operandOne is a constant value -> (cmp 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                var value = short.Parse(operandOne);
+                //data register and constant value (cmp 2, reg1)
+                if (Processor.registerDictionary.ContainsKey(operandTwo))
+                {
+                    SetCompareFlags(value, Processor.registerDictionary[operandTwo]);
+                    return true;
+                }
 
-                Processor.NotEqual = false;
-                Processor.Less = false;
-                Processor.Greater = false;
-            }
-            else if (Processor.registerDictionary[reg1] < Processor.registerDictionary[reg2])
-            {
-                Processor.Equal = false;
-                Processor.LessEqual = false;
-                Processor.GreaterEqual = false;
+                //data register and memory location (cmp 2, mem[index])
+                if (operandTwo.Contains("mem["))
+                {
+                    int index = GetMemoryIndex(operandTwo);
+                    if (index != -1)
+                    {
+                        SetCompareFlags(value, Memory.programData[index]);
+                        return true;
+                    }
+                    return false;
+                }
+                //data register and constant value (cmp 2, reg1)
 
-                Processor.NotEqual = true;
-                Processor.Less = true;
-                Processor.Greater = false;
+                if (DigitsOnlyRegex().IsMatch(operandTwo))
+                {
+                    short operandTwoValue = short.Parse(operandTwo);
+                    SetCompareFlags(value, operandTwoValue);
+                    return true;
+                }
             }
-            else if (Processor.registerDictionary[reg1] > Processor.registerDictionary[reg2])
+            //operandOne is a memory location
+            //TODO: add checks if the memory location is valid
+            if (operandOne.Contains("mem["))
             {
-                Processor.Equal = false;
-                Processor.LessEqual = false;
-                Processor.GreaterEqual = false;
+                int index = GetMemoryIndex(operandOne);
+                if (index != -1)
+                {
+                    //memory location and constant value
+                    if (DigitsOnlyRegex().IsMatch(operandTwo))
+                    {
+                        SetCompareFlags(Memory.programData[index], short.Parse(operandTwo));
+                        return true;
+                    }
 
-                Processor.NotEqual = true;
-                Processor.Less = false;
-                Processor.Greater = true;
-            }
-            else
-            {
-                Console.Write("Error: Other case in Compare function");
-            }
-        }
+                    //memory location and data register
+                    if (Processor.registerDictionary.ContainsKey(operandTwo))
+                    {
+                        SetCompareFlags(Memory.programData[index], Processor.registerDictionary[operandTwo]);
+                        return true;
+                    }
 
-        public void Compare(string reg1, short val)
-        {
-            if (Processor.registerDictionary[reg1] == val)
-            {
-                Processor.Equal = true;
-                Processor.LessEqual = true;
-                Processor.GreaterEqual = true;
+                    //memory location and memory location
+                    if (operandTwo.Contains("mem["))
+                    {
+                        int indexOperandTwo = GetMemoryIndex(operandTwo);
+                        if (indexOperandTwo != -1)
+                        {
+                            SetCompareFlags(Memory.programData[index], Memory.programData[indexOperandTwo]);
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+            }
+            //here is an error, not good
+            return false;
 
-                Processor.NotEqual = false;
-                Processor.Less = false;
-                Processor.Greater = false;
-            }
-            else if (Processor.registerDictionary[reg1] < val)
-            {
-                Processor.Equal = false;
-                Processor.LessEqual = false;
-                Processor.GreaterEqual = false;
 
-                Processor.NotEqual = true;
-                Processor.Less = true;
-                Processor.Greater = false;
-            }
-            else if (Processor.registerDictionary[reg1] > val)
-            {
-                Processor.Equal = false;
-                Processor.LessEqual = false;
-                Processor.GreaterEqual = false;
-
-                Processor.NotEqual = true;
-                Processor.Less = false;
-                Processor.Greater = true;
-            }
-            else
-            {
-                Console.Write("Error: Other case in Compare function");
-            }
         }
 
         public void Division(string reg1, string reg2)
@@ -276,9 +321,9 @@ namespace ProjectSQ.Services
 
         public void Jump(string label)
         {
-            for(int index = 0; index < Processor.internalMemory.Length; index++)
-                if (Processor.internalMemory[index].Equals(label))
-                    Processor.currentInstruction = index;
+            for(int index = 0; index < Memory.internalMemory.Length; index++)
+                if (Memory.internalMemory[index].Equals(label))
+                    Memory.currentInstruction = index;
         }
 
         public void JumpIfEqual(string label)
@@ -332,7 +377,7 @@ namespace ProjectSQ.Services
 
         public void Not(string reg1)
         {
-            Processor.registerDictionary[reg1] = ~Processor.registerDictionary[reg1];
+            //Processor.registerDictionary[reg1] = ~Processor.registerDictionary[reg1];
             throw new NotImplementedException();
         }
 
@@ -349,7 +394,7 @@ namespace ProjectSQ.Services
 
         public void Push(string reg)
         {
-            if (Processor.currentStackPointer < Processor.maximumSize)
+            if (Processor.currentStackPointer < Memory.programData.Length)
             {
                 //Processor.programData[Processor.currentStackPointer] = reg;
                 //Processor.currentStackPointer++;
@@ -425,7 +470,57 @@ namespace ProjectSQ.Services
             return -1; 
         }
 
+        private void SetCompareFlags(short operandValueOne, short operandValueTwo)
+        {
+            Processor.Equal = false;
+            Processor.LessEqual = false;
+            Processor.GreaterEqual = false;
+
+            Processor.NotEqual = false;
+            Processor.Less = false;
+            Processor.Greater = false;
+
+            if (operandValueOne == operandValueTwo)
+            {
+                Processor.Equal = true;
+                Processor.LessEqual = true;
+                Processor.GreaterEqual = true;
+
+                Processor.NotEqual = false;
+                Processor.Less = operandValueOne <= operandValueTwo;
+                Processor.Greater = operandValueOne >= operandValueTwo;
+
+                return;
+            }
+            if (operandValueOne < operandValueTwo)
+            {
+                Processor.Equal = false;
+                Processor.LessEqual = true;
+                Processor.GreaterEqual = false;
+
+                Processor.NotEqual = true;
+                Processor.Less = true;
+                Processor.Greater = false;
+
+                return;
+            }
+            if (operandValueOne > operandValueTwo)
+            {
+                Processor.Equal = false;
+                Processor.LessEqual = false;
+                Processor.GreaterEqual = true;
+
+                Processor.NotEqual = true;
+                Processor.Less = false;
+                Processor.Greater = true;
+
+                return;
+            }
+            Console.Write("Error: Other case in Compare function");
+        }
+
         [GeneratedRegex(@"^\d+$")]
         private static partial Regex DigitsOnlyRegex();
+
     }
 }

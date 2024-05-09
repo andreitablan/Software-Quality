@@ -7,7 +7,7 @@ namespace ProjectSQ.Models
         public static int currentInstruction = 0;
         public static string[] internalMemory = new string[1024];
         public static short[] programData = new short[65536];//0->60.000 mem, restul stack
-
+        public static int instructionNumber = 0;
 
         //program's configuration file
         //each size must be a multiple of 1 KB ( = 1024 bytes)

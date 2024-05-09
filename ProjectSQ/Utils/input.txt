@@ -1,0 +1,4 @@
+mov reg1,6
+mov reg2,reg1
+mov mem[3],7
+mov reg1,mem[3]

@@ -12,6 +12,7 @@ namespace ProjectSQ.Services
                 try
                 {
                     string[] lines = File.ReadAllLines(file);
+                    Memory.instructionNumber = lines.Length;
                     for (int i = 0; i < lines.Length; i++)
                     {
                         Memory.internalMemory[i] = lines[i];
