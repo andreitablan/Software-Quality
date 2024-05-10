@@ -1,6 +1,0 @@
-@ProjectSQ_HostAddress = http://localhost:5135
-
-GET {{ProjectSQ_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

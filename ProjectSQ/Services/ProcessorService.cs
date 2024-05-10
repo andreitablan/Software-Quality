@@ -468,6 +468,27 @@ namespace ProjectSQ.Services
         {
             throw new NotImplementedException();
         }
+        public ResultRegisters LoadResultRegisters()
+        {
+            ResultRegisters resultRegisters = new ResultRegisters();
+            resultRegisters.Reg1 = Processor.registerDictionary["reg1"];
+            resultRegisters.Reg2 = Processor.registerDictionary["reg2"];
+            resultRegisters.Reg3 = Processor.registerDictionary["reg3"];
+            resultRegisters.Reg4 = Processor.registerDictionary["reg4"];
+            resultRegisters.Reg5 = Processor.registerDictionary["reg5"];
+            resultRegisters.Reg6 = Processor.registerDictionary["reg6"];
+            resultRegisters.Reg7 = Processor.registerDictionary["reg7"];
+            resultRegisters.Reg8 = Processor.registerDictionary["reg8"];
+            return resultRegisters;
+        }
+        public void ResetData()
+        {
+            foreach (var kvp in Processor.registerDictionary)
+                Processor.registerDictionary[kvp.Key] = 0;
+            Memory.currentInstruction = 0;
+            for(int i = 0; i < Memory.programData.Length; i++)
+                Memory.programData[i] = 0;
+        }
         private void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
         {
             byte highByte = (byte)(valueOperandTwo >> 8); 
@@ -577,6 +598,5 @@ namespace ProjectSQ.Services
 
         [GeneratedRegex(@"^\d+$")]
         private static partial Regex DigitsOnlyRegex();
-
     }
 }

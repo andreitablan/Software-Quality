@@ -1,4 +1,6 @@
-﻿namespace ProjectSQ.Interfaces.Processor
+﻿using ProjectSQ.Models;
+
+namespace ProjectSQ.Interfaces.Processor
 {
     public interface IProcessorService
     {
@@ -39,5 +41,7 @@
         void Call(string functionName);
         void Return();
 
+        ResultRegisters LoadResultRegisters();
+        void ResetData();
     }
 }

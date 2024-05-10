@@ -1,3 +1,8 @@
+using ProjectSQ.Interfaces.Memory;
+using ProjectSQ.Interfaces.Parser;
+using ProjectSQ.Interfaces.Processor;
+using ProjectSQ.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IParseService, ParseService>();
+builder.Services.AddScoped<IProcessorService, ProcessorService>();
+builder.Services.AddScoped<IMemoryService, MemoryService>();
 
 var app = builder.Build();
 
