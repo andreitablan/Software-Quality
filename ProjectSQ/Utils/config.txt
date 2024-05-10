@@ -1,0 +1,2 @@
+internalMemory=1024
+programData=65536

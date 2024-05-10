@@ -5,6 +5,7 @@ using ProjectSQ.Interfaces.Parser;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
 using ProjectSQ.Services;
+using System.IO;
 
 namespace ProjectSQ.Controllers
 {
@@ -21,6 +22,7 @@ namespace ProjectSQ.Controllers
             this.memoryService = memoryService;
             this.parseService = parseService;
             this.processorService = processorService;
+
         }
         [HttpGet]
         public ResultMemory GetMemoryValues()

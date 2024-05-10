@@ -475,25 +475,20 @@ namespace ProjectSQ.Services
                 Jump(label);
         }
 
-        public void Pop(string reg)
+        public byte Pop()
         {
-            throw new NotImplementedException();
+            return Memory.programData[Memory.currentStackPointer--];
         }
 
-        public void Push(string reg)
+        public void Push(byte val)//TODO: check daca trb byte sau tot ushort si pus in 2 zone pe stack(da pare dubios asa sincer)
         {
-            if (Processor.currentStackPointer < Memory.programData.Length)
+            if (Memory.currentStackPointer < Memory.programData.Length)
             {
-                //Processor.programData[Processor.currentStackPointer] = reg;
-                //Processor.currentStackPointer++;
+                Memory.programData[Memory.currentStackPointer] = val;
+                Memory.currentStackPointer++;
             }
-            throw new NotImplementedException();
         }
 
-        public void Return()
-        {
-            throw new NotImplementedException();
-        }
         public ResultRegisters LoadResultRegisters()
         {
             ResultRegisters resultRegisters = new ResultRegisters();
@@ -624,5 +619,20 @@ namespace ProjectSQ.Services
 
         [GeneratedRegex(@"^\d+$")]
         private static partial Regex DigitsOnlyRegex();
+
+        void IProcessorService.Push(string reg)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IProcessorService.Pop(string reg)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IProcessorService.Return()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
