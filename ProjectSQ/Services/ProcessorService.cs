@@ -11,7 +11,7 @@ namespace ProjectSQ.Services
         public void ExecuteFile()
         {
             bool isInputFileGood = true;
-            while (Memory.currentInstruction < Memory.instructionNumber && isInputFileGood)
+            while (Memory.currentInstruction < Memory.instructionsNumber && isInputFileGood)
             {
                 string instruction = Memory.internalMemory[Memory.currentInstruction++];
                 string[] words = instruction.Split(' ');
@@ -62,10 +62,33 @@ namespace ProjectSQ.Services
                         operands = words[1].Split(",");
                         isInputFileGood = ShiftRight(operands[0], operands[1]);
                         break;
-
                     case "jmp":
+                        Jump(words[1]);
                         break;
-
+                    case "je":
+                        JumpIfEqual(words[1]);
+                        break;
+                    case "jle":
+                        JumpIfLessThanOrEqual(words[1]);
+                        break;
+                    case "jge":
+                        JumpIfGreaterThanOrEqual(words[1]);
+                        break;
+                    case "jne":
+                        JumpIfNotEqual(words[1]);
+                        break;
+                    case "jl":
+                        JumpIfLessThan(words[1]);
+                        break;
+                    case "jg":
+                        JumpIfGreaterThan(words[1]);
+                        break;
+                    case "cmp":
+                        operands = words[1].Split(",");
+                        Compare(operands[0], operands[1]);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -408,9 +431,12 @@ namespace ProjectSQ.Services
 
         public void Jump(string label)
         {
-            for(int index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Equals(label))
-                    Memory.currentInstruction = index;
+            for (int index = 0; index < Memory.internalMemory.Length; index++)
+                if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
+                {
+                    Memory.currentInstruction = Math.Min(index + 1, Memory.instructionsNumber);
+                    break;
+                }
         }
 
         public void JumpIfEqual(string label)

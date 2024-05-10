@@ -27,7 +27,7 @@ namespace ProjectSQ.Services
                         Memory.internalMemory[index] = line;
                         index++;
                     }
-                    Memory.instructionNumber = index;
+                    Memory.instructionsNumber = index;
                 }
             }
         }

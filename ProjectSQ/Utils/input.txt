@@ -1,4 +1,7 @@
 mov reg1,6
 mov reg2,reg1
 mov mem[3],7
+cmp reg1,reg2
+je aoleu
 mov reg1,mem[3]
+label aoleu
