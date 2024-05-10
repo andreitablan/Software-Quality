@@ -1,5 +1,7 @@
 ﻿using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
+using System;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace ProjectSQ.Services
@@ -26,23 +28,39 @@ namespace ProjectSQ.Services
                         isInputFileGood = Addition(operands[0], operands[1]);
                         break;
                     case "sub":
+                        operands = words[1].Split(",");
+                        isInputFileGood = Subtraction(operands[0], operands[1]);
                         break;
                     case "mul":
+                        operands = words[1].Split(",");
+                        isInputFileGood = Multiplication(operands[0], operands[1]);
                         break;
                     case "div":
-                        break;
-
-                    case "and":
-                        break;
-                    case "or":
-                        break;
-                    case "xor":
+                        operands = words[1].Split(",");
+                        isInputFileGood = Division(operands[0], operands[1]);
                         break;
                     case "not":
+                        isInputFileGood = Not(words[0]);
+                        break;
+                    case "and":
+                        operands = words[1].Split(",");
+                        isInputFileGood = And(operands[0], operands[1]);
+                        break;
+                    case "or":
+                        operands = words[1].Split(",");
+                        isInputFileGood = Or(operands[0], operands[1]);
+                        break;
+                    case "xor":
+                        operands = words[1].Split(",");
+                        isInputFileGood = Xor(operands[0], operands[1]);
                         break;
                     case "shr":
+                        operands = words[1].Split(",");
+                        isInputFileGood = ShiftLeft(operands[0], operands[1]);
                         break;
                     case "shl":
+                        operands = words[1].Split(",");
+                        isInputFileGood = ShiftRight(operands[0], operands[1]);
                         break;
 
                     case "jmp":
@@ -54,33 +72,12 @@ namespace ProjectSQ.Services
 
         public bool Assignment(string operandOne, string operandTwo)
         {
-            //both operands are data register (mov reg1,reg2)
-            if (Processor.registerDictionary.ContainsKey(operandOne) && Processor.registerDictionary.ContainsKey(operandTwo))
-            {
-                Processor.registerDictionary[operandOne] = Processor.registerDictionary[operandTwo];
-                return true;
-            }
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
-                //data register and constant value (mov reg1,2)
-                if (DigitsOnlyRegex().IsMatch(operandTwo))
-                {
-                    short value = short.Parse(operandTwo);
-                    Processor.registerDictionary[operandOne] = value;
-                    return true;
-                }
-                //data register and memory location (mov reg1, mem[index])
-                if (operandTwo.Contains("mem["))
-                {
-                    int index = GetMemoryIndex(operandTwo);
-                    if (index != -1)
-                    {
-                        Processor.registerDictionary[operandOne] = Memory.programData[index];
-                        return true;
-                    }
-                    return false;
-                }
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] = value;
+                return true;
             }
             //operandOne is a constant value -> error (mov 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
@@ -88,70 +85,24 @@ namespace ProjectSQ.Services
                 return false;
             }
             //operandOne is a memory location
-            //TODO: add checks if the memory location is valid
             if (operandOne.Contains("mem["))
             {
-                int index = GetMemoryIndex(operandOne);
-                if (index != -1)
-                {
-                    //memory location and constant value
-                    if (DigitsOnlyRegex().IsMatch(operandTwo))
-                    {
-                        Memory.programData[index] = short.Parse(operandTwo);
-                        return true;
-                    }
-
-                    //memory location and data register
-                    if (Processor.registerDictionary.ContainsKey(operandTwo))
-                    {
-                        Memory.programData[index] = Processor.registerDictionary[operandTwo];
-                        return true;
-                    }
-                    //memory location and memory location
-                    if (operandTwo.Contains("mem["))
-                    {
-                        int indexTwo = GetMemoryIndex(operandTwo);
-                        if(indexTwo != -1)
-                        {
-                            Memory.programData[index] = Memory.programData[indexTwo];
-                            return true;
-                        }
-                    }
-                }
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                WriteValueToMemory(indexOperandOne, valueOperandTwo);
+                return true;
             }
             //here is an error, not good
             return false;
         }
-
         public bool Addition(string operandOne, string operandTwo)
         {
-            //both operands are data register (add reg1,reg2)
-            if (Processor.registerDictionary.ContainsKey(operandOne) && Processor.registerDictionary.ContainsKey(operandTwo))
-            {
-                Processor.registerDictionary[operandOne] += Processor.registerDictionary[operandTwo];
-                return true;
-            }
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
-                //data register and constant value (add reg1,2)
-                if (DigitsOnlyRegex().IsMatch(operandTwo))
-                {
-                    short value = short.Parse(operandTwo);
-                    Processor.registerDictionary[operandOne] += value;
-                    return true;
-                }
-                //data register and memory location (add reg1, mem[index])
-                if (operandTwo.Contains("mem["))
-                {
-                    int index = GetMemoryIndex(operandTwo);
-                    if (index != -1)
-                    {
-                        Processor.registerDictionary[operandOne] += Memory.programData[index];
-                        return true;
-                    }
-                    return false;
-                }
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] += value;
+                return true;
             }
             //operandOne is a constant value -> error (add 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
@@ -159,162 +110,298 @@ namespace ProjectSQ.Services
                 return false;
             }
             //operandOne is a memory location
-            //TODO: add checks if the memory location is valid
             if (operandOne.Contains("mem["))
             {
-                int index = GetMemoryIndex(operandOne);
-                if (index != -1)
-                {
-                    //memory location and constant value
-                    if (DigitsOnlyRegex().IsMatch(operandTwo))
-                    {
-                        Memory.programData[index] += short.Parse(operandTwo);
-                        return true;
-                    }
-
-                    //memory location and data register
-                    if (Processor.registerDictionary.ContainsKey(operandTwo))
-                    {
-                        Memory.programData[index] += Processor.registerDictionary[operandTwo];
-                        return true;
-                    }
-                    //memory location and memory location
-                    if (operandTwo.Contains("mem["))
-                    {
-                        int indexTwo = GetMemoryIndex(operandTwo);
-                        if (indexTwo != -1)
-                        {
-                            Memory.programData[index] += Memory.programData[indexTwo];
-                            return true;
-                        }
-                    }
-                }
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne + valueOperandTwo);
+                
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
             }
             //here is an error, not good
             return false;
         }
-
-        public void And(string reg1, string reg2)
+        public bool Subtraction(string operandOne, string operandTwo)
         {
-            Processor.registerDictionary[reg1] &= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] -= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (sub 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
 
-        public void Call(string functionName)
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne - valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool Multiplication(string operandOne, string operandTwo)
         {
-            throw new NotImplementedException();
-        }
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] *= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (mul 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne * valueOperandTwo);
 
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool Division(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] /= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (div 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne / valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool Not(string operandOne)
+        {
+            //register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                Processor.registerDictionary[operandOne] = (ushort)~Processor.registerDictionary[operandOne];
+                return true;
+            }
+            //constant value -> you can not do that
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            if (operandOne.Contains("mem["))
+            {
+                int index = GetMemoryIndex(operandOne);
+                Memory.programData[index] = (byte)~Memory.programData[index];
+                Memory.programData[index + 1] = (byte)~Memory.programData[index + 1];
+                return true;
+            }
+            return false;
+        }
+        public bool And(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] &= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (and 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne & valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool Or(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] |= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (or 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne | valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool Xor(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] ^= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (xor 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne ^ valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool ShiftLeft(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] <<= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (shl 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne << valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
+        public bool ShiftRight(string operandOne, string operandTwo)
+        {
+            //first operand is data register
+            if (Processor.registerDictionary.ContainsKey(operandOne))
+            {
+                ushort value = GetValue(operandTwo);
+                Processor.registerDictionary[operandOne] >>= value;
+                return true;
+            }
+            //operandOne is a constant value -> error (shr 2, orice)
+            if (DigitsOnlyRegex().IsMatch(operandOne))
+            {
+                return false;
+            }
+            //operandOne is a memory location
+            if (operandOne.Contains("mem["))
+            {
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                ushort result = (ushort)(valueOperandOne >> valueOperandTwo);
+
+                WriteValueToMemory(indexOperandOne, result);
+                return true;
+            }
+            //here is an error, not good
+            return false;
+        }
         public bool Compare(string operandOne, string operandTwo)
         {
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
-                //both operands are data register (cmp reg1,reg2)
-                if (Processor.registerDictionary.ContainsKey(operandTwo))
-                {
-                    SetCompareFlags(Processor.registerDictionary[operandOne], Processor.registerDictionary[operandTwo]);
-                    return true;
-                }
-                //data register and constant value (cmp reg1,2)
-                if (DigitsOnlyRegex().IsMatch(operandTwo))
-                {
-                    short value = short.Parse(operandTwo);
-                    SetCompareFlags(Processor.registerDictionary[operandOne], value);
-                    return true;
-                }
-                //data register and memory location (cmp reg1, mem[index])
-                if (operandTwo.Contains("mem["))
-                {
-                    int index = GetMemoryIndex(operandTwo);
-                    if (index != -1)
-                    {
-                        SetCompareFlags(Processor.registerDictionary[operandOne], Memory.programData[index]);
-                        return true;
-                    }
-                    return false;
-                }
+                ushort valueOperandTwo = GetValue(operandTwo);
+                SetCompareFlags(Processor.registerDictionary[operandOne], valueOperandTwo);
+                return true;
             }
             //operandOne is a constant value -> (cmp 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
-                var value = short.Parse(operandOne);
-                //data register and constant value (cmp 2, reg1)
-                if (Processor.registerDictionary.ContainsKey(operandTwo))
-                {
-                    SetCompareFlags(value, Processor.registerDictionary[operandTwo]);
-                    return true;
-                }
-
-                //data register and memory location (cmp 2, mem[index])
-                if (operandTwo.Contains("mem["))
-                {
-                    int index = GetMemoryIndex(operandTwo);
-                    if (index != -1)
-                    {
-                        SetCompareFlags(value, Memory.programData[index]);
-                        return true;
-                    }
-                    return false;
-                }
-                //data register and constant value (cmp 2, reg1)
-
-                if (DigitsOnlyRegex().IsMatch(operandTwo))
-                {
-                    short operandTwoValue = short.Parse(operandTwo);
-                    SetCompareFlags(value, operandTwoValue);
-                    return true;
-                }
+                ushort valueOperandOne = ushort.Parse(operandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                SetCompareFlags(valueOperandOne, valueOperandTwo);
+                return true;
             }
             //operandOne is a memory location
             //TODO: add checks if the memory location is valid
             if (operandOne.Contains("mem["))
             {
-                int index = GetMemoryIndex(operandOne);
-                if (index != -1)
-                {
-                    //memory location and constant value
-                    if (DigitsOnlyRegex().IsMatch(operandTwo))
-                    {
-                        SetCompareFlags(Memory.programData[index], short.Parse(operandTwo));
-                        return true;
-                    }
-
-                    //memory location and data register
-                    if (Processor.registerDictionary.ContainsKey(operandTwo))
-                    {
-                        SetCompareFlags(Memory.programData[index], Processor.registerDictionary[operandTwo]);
-                        return true;
-                    }
-
-                    //memory location and memory location
-                    if (operandTwo.Contains("mem["))
-                    {
-                        int indexOperandTwo = GetMemoryIndex(operandTwo);
-                        if (indexOperandTwo != -1)
-                        {
-                            SetCompareFlags(Memory.programData[index], Memory.programData[indexOperandTwo]);
-                            return true;
-                        }
-                        return false;
-                    }
-                }
+                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
+                ushort valueOperandTwo = GetValue(operandTwo);
+                SetCompareFlags(valueOperandOne, valueOperandTwo);
+                return true;
             }
             //here is an error, not good
             return false;
-
-
         }
-
-        public void Division(string reg1, string reg2)
+        public void Call(string functionName)
         {
-            Processor.registerDictionary[reg1] /= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
-        public void Division(string reg1, short val)
-        {
-            Processor.registerDictionary[reg1] /= val;
             throw new NotImplementedException();
         }
 
@@ -362,31 +449,6 @@ namespace ProjectSQ.Services
                 Jump(label);
         }
 
-
-        public void Multiplication(string reg1, string reg2)
-        {
-            Processor.registerDictionary[reg1] *= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
-        public void Multiplication(string reg1, short val)
-        {
-            Processor.registerDictionary[reg1] *= val;
-            throw new NotImplementedException();
-        }
-
-        public void Not(string reg1)
-        {
-            //Processor.registerDictionary[reg1] = ~Processor.registerDictionary[reg1];
-            throw new NotImplementedException();
-        }
-
-        public void Or(string reg1, string reg2)
-        {
-            Processor.registerDictionary[reg1] |= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
         public void Pop(string reg)
         {
             throw new NotImplementedException();
@@ -406,71 +468,65 @@ namespace ProjectSQ.Services
         {
             throw new NotImplementedException();
         }
+        private void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
+        {
+            byte highByte = (byte)(valueOperandTwo >> 8); 
+            byte lowByte = (byte)(valueOperandTwo & 0xFF);
 
-        public void Shift(string reg1, short val)
-        {
-            Processor.registerDictionary[reg1] <<= val;
-            throw new NotImplementedException();
+            // write to two consecutive addresses
+            Memory.programData[indexOperandOne] = highByte;
+            Memory.programData[indexOperandOne + 1] = lowByte;
         }
-
-        public void Shift(string reg1, string reg2)
+        private static ushort ReadValueFromMemory(int index)
         {
-            Processor.registerDictionary[reg1] <<= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
+            byte highByte = Memory.programData[index];
+            byte lowByte = Memory.programData[index + 1];
+            ushort result = (ushort)((highByte << 8) | lowByte);
+            return result;
         }
-
-        public void Subtraction(string reg1, string reg2)
+        private static ushort GetValue(string operand)
         {
-            Processor.registerDictionary[reg1] -= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-
-        public void Subtraction(string reg1, short val)
-        {
-            Processor.registerDictionary[reg1] -= val;
-            throw new NotImplementedException();
-        }
-
-        public void Xor(string reg1, string reg2)
-        {
-            Processor.registerDictionary[reg1] ^= Processor.registerDictionary[reg2];
-            throw new NotImplementedException();
-        }
-        private short GetValue(string operand)
-        {
+            //second operand is a data register
+            if (Processor.registerDictionary.TryGetValue(operand, out ushort value))
+            {
+                return value;
+            }
+            //second operand is a constant value
             if (DigitsOnlyRegex().IsMatch(operand))
             {
-                return short.Parse(operand);
+                return ushort.Parse(operand);
             }
-            //TODO: add checks if the memory location is valid
-            if (operand.Contains("mem["))
-            {
-                int index = GetMemoryIndex(operand);
-                if (index != -1)
-                {
-                    return Memory.programData[index];
-                }
-            }
-            //here is error value -> TODO: add logic here
-            return 0;
+
+            //second operand is a memory location -> need to read two consecutive addresses
+            int index = GetMemoryIndex(operand);
+            ushort result = ReadValueFromMemory(index);
+            return result;
+
+            //NOTE: case if the memory location is invalid
+            //now, we consider the input file does not have errors
         }
 
-        private short GetMemoryIndex(string operand)
+        private static ushort GetMemoryIndex(string operand)
         {
             int startIndex = operand.IndexOf('[') + 1;
             int endIndex = operand.IndexOf(']');
             string indexStr = operand[startIndex..endIndex];
 
-            if (short.TryParse(indexStr, out short index))
+            //address specified by a constant value
+            if (ushort.TryParse(indexStr, out ushort index))
             {
-                // TODO: Add checks for valid memory location if needed
                 return index;
             }
-            //invalid memory index -> TODO: add logic here
-            return -1; 
+
+            //address specified by a data register
+            Processor.registerDictionary.TryGetValue(indexStr, out index);
+            return index;
+            
+            //NOTE: case if the memory location is invalid
+            //now, we consider the input file does not have errors
         }
 
-        private void SetCompareFlags(short operandValueOne, short operandValueTwo)
+        private static void SetCompareFlags(ushort operandValueOne, ushort operandValueTwo)
         {
             Processor.Equal = false;
             Processor.LessEqual = false;

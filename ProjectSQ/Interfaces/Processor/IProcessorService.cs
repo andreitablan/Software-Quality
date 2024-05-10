@@ -7,23 +7,20 @@
 
         // Arithmetic Operations
         bool Addition(string operandOne, string operandTwo);
-        void Subtraction(string reg1, string reg2);
-        void Subtraction(string reg1, short val);
-        void Multiplication(string reg1, string reg2);
-        void Multiplication(string reg1, short val);
-        void Division(string reg1, string reg2);
-        void Division(string reg1, short val);
+        bool Subtraction(string operandOne, string operandTwo);
+        bool Multiplication(string operandOne, string operandTwo);
+        bool Division(string operandOne, string operandTwo);
 
         // Boolean Operations
-        void Not(string reg1);
-        void And(string reg1, string reg2);
-        void Or(string reg1, string reg2);
-        void Xor(string reg1, string reg2);
-        void Shift(string reg1, short val);
-        void Shift(string reg1, string reg2);
+        bool Not(string operandOne);
+        bool And(string operandOne, string operandTwo);
+        bool Or(string operandOne, string operandTwo);
+        bool Xor(string operandOne, string operandTwo);
+        bool ShiftLeft(string operandOne, string operandTwo);
+        bool ShiftRight(string operandOne, string operandTwo);
 
         // Comparison
-        public bool Compare(string operandOne, string operandTwo);
+        bool Compare(string operandOne, string operandTwo);
 
         // Jump Operations
         void Jump(string label);
