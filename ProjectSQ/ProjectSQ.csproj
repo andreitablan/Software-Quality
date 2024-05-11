@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Utils\config.txt" />
     <None Remove="Utils\input.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Utils\config.txt" />
     <EmbeddedResource Include="Utils\input.txt" />
   </ItemGroup>
 

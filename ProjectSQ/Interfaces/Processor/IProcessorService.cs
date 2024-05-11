@@ -43,5 +43,8 @@ namespace ProjectSQ.Interfaces.Processor
 
         ResultRegisters LoadResultRegisters();
         void ResetData();
+
+        //keyboard memory
+        void WriteValueToKeyboardBuffer(ushort value);
     }
 }

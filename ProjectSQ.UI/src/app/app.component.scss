@@ -1,0 +1,24 @@
+ul {
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
+  padding: 20px;
+  font-size: 20px;
+  border: none;
+  box-sizing: border-box;
+  height: 70%;
+}
+
+.simple-keyboard {
+  height: 30%;
+}
+
+.computer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+  width: 50%;
+}

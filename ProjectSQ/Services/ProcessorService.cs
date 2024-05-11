@@ -1,7 +1,5 @@
 ﻿using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
-using System;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace ProjectSQ.Services
@@ -111,6 +109,12 @@ namespace ProjectSQ.Services
             if (operandOne.Contains("mem["))
             {
                 int indexOperandOne = GetMemoryIndex(operandOne);
+
+                if (indexOperandOne >= Memory.keyboardBufferIndex)
+                {
+                    return false;
+                }
+
                 ushort valueOperandTwo = GetValue(operandTwo);
                 WriteValueToMemory(indexOperandOne, valueOperandTwo);
                 return true;
@@ -139,7 +143,7 @@ namespace ProjectSQ.Services
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne + valueOperandTwo);
-                
+
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
@@ -507,12 +511,40 @@ namespace ProjectSQ.Services
             foreach (var kvp in Processor.registerDictionary)
                 Processor.registerDictionary[kvp.Key] = 0;
             Memory.currentInstruction = 0;
-            for(int i = 0; i < Memory.programData.Length; i++)
+            for (int i = 0; i < Memory.programData.Length; i++)
                 Memory.programData[i] = 0;
         }
+
+        public void WriteValueToKeyboardBuffer(ushort value)
+        {
+            byte lowByte = (byte)(value & 0xFF);
+            Memory.programData[Memory.keyboardBufferIndex] = lowByte;
+            Memory.isKeyboardBufferChanged = true;
+        }
+
+        public void WriteToVideoMemory()
+        {
+            while (true)
+            {
+                if (Memory.isKeyboardBufferChanged)
+                {
+                    Memory.programData[Memory.lastIndexOfMemoryVideo] = Memory.programData[Memory.keyboardBufferIndex];
+
+                    if (Memory.lastIndexOfMemoryVideo < Memory.maxIndexOfMemoryVideo)
+                    {
+                        Memory.lastIndexOfMemoryVideo++;
+                    }
+
+                    Memory.isKeyboardBufferChanged = false;
+
+
+                }
+            }
+        }
+
         private void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
         {
-            byte highByte = (byte)(valueOperandTwo >> 8); 
+            byte highByte = (byte)(valueOperandTwo >> 8);
             byte lowByte = (byte)(valueOperandTwo & 0xFF);
 
             // write to two consecutive addresses
@@ -563,7 +595,7 @@ namespace ProjectSQ.Services
             //address specified by a data register
             Processor.registerDictionary.TryGetValue(indexStr, out index);
             return index;
-            
+
             //NOTE: case if the memory location is invalid
             //now, we consider the input file does not have errors
         }

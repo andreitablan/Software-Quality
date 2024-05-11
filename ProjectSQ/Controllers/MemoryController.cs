@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProjectSQ.Interfaces.Memory;
 using ProjectSQ.Interfaces.Parser;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
-using ProjectSQ.Services;
-using System.IO;
 
 namespace ProjectSQ.Controllers
 {
@@ -30,8 +27,15 @@ namespace ProjectSQ.Controllers
             parseService.LoadInstructions("ProjectSQ.Utils.input.txt");
             processorService.ExecuteFile();
             var result = memoryService.LoadMemoryData();
-            processorService.ResetData();
+            //processorService.ResetData();
             return result;
+        }
+
+        [HttpPost("letter")]
+        public void PostLetter([FromBody] string letter)
+        {
+            char character = letter[0];
+            processorService.WriteValueToKeyboardBuffer((ushort)character);
         }
     }
 }
