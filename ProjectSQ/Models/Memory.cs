@@ -20,6 +20,20 @@ namespace ProjectSQ.Models
 
         public static void InitMemory()
         {
+
+            startStack = 60000;
+            endStack = 65535;
+            currentInstruction = 0;
+            internalMemory = new string[1024];
+            programData = new byte[65536];//0->60.000 mem, restul stack
+            instructionsNumber = 0;
+
+            keyboardBufferIndex = 50000;
+            isKeyboardBufferChanged = false;
+            firstVideoMemoryIndex = 50001;
+            currentIndexMemoryVideo = 50001;
+            lastIndexOfMemoryVideo = 50001;
+            maxIndexOfMemoryVideo = 60000;
             string configFilePath = "ProjectSQ.Utils.config.txt";
 
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -56,8 +70,7 @@ namespace ProjectSQ.Models
                                     programData = new byte[arraySize];
                                     ushort memoryPart = (ushort)(arraySize / 8);
                                     keyboardBufferIndex = (ushort)(5 * memoryPart);
-                                    firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
-                                    currentIndexMemoryVideo = firstVideoMemoryIndex;
+                                    currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
                                     maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
                                     startStack = (ushort)(maxIndexOfMemoryVideo + 1);
                                     endStack = arraySize;

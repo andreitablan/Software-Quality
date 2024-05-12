@@ -546,7 +546,7 @@ namespace ProjectSQ.Services
             ushort result = 0;
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
             {
-                result = (ushort)(result * 10 + (ushort)((char)(Memory.programData[Memory.currentIndexMemoryVideo])));
+                result = (ushort)(result * 10 + ((char)(Memory.programData[Memory.currentIndexMemoryVideo]) - '0'));
                 Memory.currentIndexMemoryVideo++;
             }
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] == ' ')
@@ -570,12 +570,8 @@ namespace ProjectSQ.Services
         }
         public void ResetData()
         {
-            foreach (var kvp in Processor.registerDictionary)
-                Processor.registerDictionary[kvp.Key] = 0;
-            Memory.currentInstruction = 0;
-            for (int i = 0; i < Memory.programData.Length; i++)
-                Memory.programData[i] = 0;
-            Processor.StackPointer = Memory.startStack;
+            Processor.InitProcessor();
+            Memory.InitMemory();
         }
 
         public void WriteValueToKeyboardBuffer(ushort value)

@@ -1,10 +1,8 @@
-﻿using System.Numerics;
-
-namespace ProjectSQ.Models
+﻿namespace ProjectSQ.Models
 {
     public static class Processor
     {
-        public static readonly Dictionary<string, ushort> registerDictionary = new Dictionary<string, ushort> {
+        public static Dictionary<string, ushort> registerDictionary = new Dictionary<string, ushort> {
             {"reg1" , 0 }, {"reg2" , 0 }, {"reg3" , 0 },{"reg4" , 0 }, {"reg5" , 0 }, {"reg6" , 0 }, {"reg7" , 0 }, {"reg8" , 0 }
         };
         public static ushort StackPointer { get; set; }
@@ -14,5 +12,20 @@ namespace ProjectSQ.Models
         public static bool Greater { get; set; }
         public static bool LessEqual { get; set; }
         public static bool GreaterEqual { get; set; }
+
+        public static void InitProcessor()
+        {
+            registerDictionary = new Dictionary<string, ushort> {
+            {"reg1" , 0 }, {"reg2" , 0 }, {"reg3" , 0 },{"reg4" , 0 }, {"reg5" , 0 }, {"reg6" , 0 }, {"reg7" , 0 }, {"reg8" , 0 }
+        };
+
+            StackPointer = 0;
+            Greater = false;
+            Less = false;
+            NotEqual = false;
+            LessEqual = false;
+            GreaterEqual = false;
+            Equal = false;
+        }
     }
 }

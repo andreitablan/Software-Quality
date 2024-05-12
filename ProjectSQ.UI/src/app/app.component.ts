@@ -7,18 +7,20 @@ import {
 import Keyboard from 'simple-keyboard';
 import { ApiService } from './api.service';
 import { AppSignalRService } from './app-signalR.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   standalone: true,
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  imports: [CommonModule],
 })
 export class AppComponent implements AfterViewInit {
   value = '';
   keyboard!: Keyboard;
   receivedMessage: string = '';
-  executionResult: any;
+  memory: any;
 
   constructor(
     private apiService: ApiService,
@@ -34,7 +36,18 @@ export class AppComponent implements AfterViewInit {
       this.signalRService
         .receiveExecutionResult()
         .subscribe((executionResult) => {
-          this.executionResult = executionResult;
+          this.receivedMessage += '\n';
+
+          this.receivedMessage += `Register1: ${executionResult?.registers.reg1}\n`;
+          this.receivedMessage += `Register2: ${executionResult?.registers.reg2}\n`;
+          this.receivedMessage += `Register3: ${executionResult?.registers.reg3}\n`;
+          this.receivedMessage += `Register4: ${executionResult?.registers.reg4}\n`;
+          this.receivedMessage += `Register5: ${executionResult?.registers.reg5}\n`;
+          this.receivedMessage += `Register6: ${executionResult?.registers.reg6}\n`;
+          this.receivedMessage += `Register7: ${executionResult?.registers.reg7}\n`;
+          this.receivedMessage += `Register8: ${executionResult?.registers.reg8}\n`;
+
+          this.memory = executionResult.memory;
         });
     });
 

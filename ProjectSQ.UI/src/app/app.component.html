@@ -1,11 +1,14 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div class="computer">
-  <button (click)="execute()">Execute</button>
-  <textarea
-    id="myTextarea"
-    value="{{ receivedMessage }}"
-    placeholder="Tap on the virtual keyboard to start"
-  ></textarea>
+<div class="content">
+  <div class="computer">
+    <button (click)="execute()">Execute</button>
+    <textarea
+      id="myTextarea"
+      value="{{ receivedMessage }}"
+      placeholder="Tap on the virtual keyboard to start"
+    ></textarea>
 
-  <div class="simple-keyboard"></div>
+    <div class="simple-keyboard"></div>
+  </div>
+  <div class="memory">{{ memory | json }}</div>
 </div>
