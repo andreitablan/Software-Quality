@@ -4,16 +4,16 @@ namespace ProjectSQ.Models
 {
     public static class Memory
     {
-        public static int startStack = 60000, endStack = 65535, currentStackPointer = 60000;
-        public static int currentInstruction = 0;
+        public static ushort startStack = 60000, endStack = 65535;
+        public static ushort currentInstruction = 0;
         public static string[] internalMemory = new string[1024];
         public static byte[] programData = new byte[65536];//0->60.000 mem, restul stack
-        public static int instructionsNumber = 0;
-        public static int keyboardBufferIndex = 50000;
+        public static ushort instructionsNumber = 0;
+
+        public static ushort keyboardBufferIndex = 50000;
         public static bool isKeyboardBufferChanged = false;
-        public static int lastIndexOfMemoryVideo = 50001;
-        public static int maxIndexOfMemoryVideo = 60000;
-        public static int firstVideoMemoryIndex = 50001;
+        public static ushort lastIndexOfMemoryVideo = 50001;
+        public static ushort maxIndexOfMemoryVideo = 60000;
 
 
         public static void InitMemory()
@@ -43,22 +43,22 @@ namespace ProjectSQ.Models
 
                             if (key == "internalMemory")
                             {
-                                if (int.TryParse(value, out int arraySize))
+                                if (ushort.TryParse(value, out ushort arraySize))
                                     internalMemory = new string[arraySize];
                             }
 
                             else if (key == "programData")
                             {
-                                if (int.TryParse(value, out int arraySize))
+                                if (ushort.TryParse(value, out ushort arraySize))
                                 {
                                     programData = new byte[arraySize];
-                                    var memoryPart = arraySize / 8;
-                                    keyboardBufferIndex = 5 * memoryPart;
-                                    firstVideoMemoryIndex = lastIndexOfMemoryVideo = keyboardBufferIndex + 1;
-                                    maxIndexOfMemoryVideo = 7 * memoryPart;
-                                    startStack = maxIndexOfMemoryVideo + 1;
+                                    ushort memoryPart = (ushort)(arraySize / 8);
+                                    keyboardBufferIndex = (ushort)(5 * memoryPart);
+                                    firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
+                                    maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
+                                    startStack = (ushort)(maxIndexOfMemoryVideo + 1);
                                     endStack = arraySize;
-
+                                    Processor.StackPointer = startStack;
                                 }
                             }
                         }

@@ -1,5 +1,6 @@
 ﻿using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
+using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 
 namespace ProjectSQ.Services
@@ -61,6 +62,10 @@ namespace ProjectSQ.Services
                         operands = words[1].Split(",");
                         isInputFileGood = ShiftRight(operands[0], operands[1]);
                         break;
+                    case "cmp":
+                        operands = words[1].Split(",");
+                        Compare(operands[0], operands[1]);
+                        break;
                     case "jmp":
                         Jump(words[1]);
                         break;
@@ -82,9 +87,15 @@ namespace ProjectSQ.Services
                     case "jg":
                         JumpIfGreaterThan(words[1]);
                         break;
-                    case "cmp":
-                        operands = words[1].Split(",");
-                        Compare(operands[0], operands[1]);
+                    case "push":
+                        Push(words[1]);
+                        break;
+                    case "pop":
+                        Pop(words[1]);
+                        break;
+                    case "call":
+                        break;
+                    case "ret":
                         break;
                     default:
                         break;
@@ -109,7 +120,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
 
                 if (indexOperandOne >= Memory.keyboardBufferIndex)
                 {
@@ -140,7 +151,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne + valueOperandTwo);
@@ -168,7 +179,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
 
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
@@ -197,7 +208,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne * valueOperandTwo);
@@ -225,7 +236,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne / valueOperandTwo);
@@ -251,7 +262,7 @@ namespace ProjectSQ.Services
             }
             if (operandOne.Contains("mem["))
             {
-                int index = GetMemoryIndex(operandOne);
+                ushort index = GetMemoryIndex(operandOne);
                 Memory.programData[index] = (byte)~Memory.programData[index];
                 Memory.programData[index + 1] = (byte)~Memory.programData[index + 1];
                 return true;
@@ -275,7 +286,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne & valueOperandTwo);
@@ -303,7 +314,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne | valueOperandTwo);
@@ -331,7 +342,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne ^ valueOperandTwo);
@@ -359,7 +370,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne << valueOperandTwo);
@@ -387,7 +398,7 @@ namespace ProjectSQ.Services
             //operandOne is a memory location
             if (operandOne.Contains("mem["))
             {
-                int indexOperandOne = GetMemoryIndex(operandOne);
+                ushort indexOperandOne = GetMemoryIndex(operandOne);
                 ushort valueOperandOne = ReadValueFromMemory(indexOperandOne);
                 ushort valueOperandTwo = GetValue(operandTwo);
                 ushort result = (ushort)(valueOperandOne >> valueOperandTwo);
@@ -428,18 +439,12 @@ namespace ProjectSQ.Services
             //here is an error, not good
             return false;
         }
-        public void Call(string functionName)
-        {
-            throw new NotImplementedException();
-        }
-
-
         public void Jump(string label)
         {
-            for (int index = 0; index < Memory.internalMemory.Length; index++)
+            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
                 if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
                 {
-                    Memory.currentInstruction = Math.Min(index + 1, Memory.instructionsNumber);
+                    Memory.currentInstruction = Math.Min((ushort)(index + 1), Memory.instructionsNumber);
                     break;
                 }
         }
@@ -480,18 +485,42 @@ namespace ProjectSQ.Services
                 Jump(label);
         }
 
-        public byte Pop()
+        public void Pop(string operand)
         {
-            return Memory.programData[Memory.currentStackPointer--];
+            Processor.StackPointer -= 2;
+            ushort valueStack = ReadValueFromMemory(Processor.StackPointer);
+            Memory.programData[Processor.StackPointer] = 0;
+            Memory.programData[Processor.StackPointer + 1] = 0;
+            
+            Processor.registerDictionary[operand] = valueStack;
         }
 
-        public void Push(byte val)//TODO: check daca trb byte sau tot ushort si pus in 2 zone pe stack(da pare dubios asa sincer)
+        public void Push(string operand)
         {
-            if (Memory.currentStackPointer < Memory.programData.Length)
-            {
-                Memory.programData[Memory.currentStackPointer] = val;
-                Memory.currentStackPointer++;
-            }
+            ushort val = GetValue(operand);
+            WriteValueToMemory(Processor.StackPointer, val);
+            Processor.StackPointer += 2;
+        }
+        public void Call(string functionName)
+        {
+            WriteValueToMemory(Processor.StackPointer, Memory.currentInstruction);
+            Processor.StackPointer += 2;
+            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
+                if (Memory.internalMemory[index].Split(' ')[1] == functionName && Memory.internalMemory[index].Split(' ')[0] == "call")
+                {
+                    Memory.currentInstruction = Math.Min((ushort)(index + 1), Memory.instructionsNumber);
+                    break;
+                }
+
+        }
+        public void Return()
+        {
+            Processor.StackPointer -= 2;
+            Memory.currentInstruction = ReadValueFromMemory(Processor.StackPointer);
+            Memory.programData[Processor.StackPointer] = 0;
+            Memory.programData[Processor.StackPointer + 1] = 0;
+            if (Memory.currentInstruction < Memory.instructionsNumber)
+                Memory.currentInstruction++;
         }
 
         public ResultRegisters LoadResultRegisters()
@@ -514,6 +543,7 @@ namespace ProjectSQ.Services
             Memory.currentInstruction = 0;
             for (int i = 0; i < Memory.programData.Length; i++)
                 Memory.programData[i] = 0;
+            Processor.StackPointer = Memory.startStack;
         }
 
         public void WriteValueToKeyboardBuffer(ushort value)
@@ -674,20 +704,5 @@ namespace ProjectSQ.Services
 
         [GeneratedRegex(@"^\d+$")]
         private static partial Regex DigitsOnlyRegex();
-
-        void IProcessorService.Push(string reg)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IProcessorService.Pop(string reg)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IProcessorService.Return()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

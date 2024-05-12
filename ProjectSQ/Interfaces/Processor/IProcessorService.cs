@@ -34,12 +34,12 @@ namespace ProjectSQ.Interfaces.Processor
         void JumpIfGreaterThanOrEqual(string label);
 
         // Stack Operations
-        void Push(string reg);
-        void Pop(string reg);
+        void Pop(string operand);
+        void Push(string operand);
 
         // Function Call/Return
         void Call(string functionName);
-        void Return();
+        //void Return();
 
         ResultRegisters LoadResultRegisters();
         void ResetData();
