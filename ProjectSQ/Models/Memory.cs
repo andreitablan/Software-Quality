@@ -20,6 +20,20 @@ namespace ProjectSQ.Models
 
         public static void InitMemory()
         {
+
+            startStack = 60000;
+            endStack = 65535;
+            currentInstruction = 0;
+            internalMemory = new string[1024];
+            programData = new byte[65536];//0->60.000 mem, restul stack
+            instructionsNumber = 0;
+
+            keyboardBufferIndex = 50000;
+            isKeyboardBufferChanged = false;
+            firstVideoMemoryIndex = 50001;
+            currentIndexMemoryVideo = 50001;
+            lastIndexOfMemoryVideo = 50001;
+            maxIndexOfMemoryVideo = 60000;
             string configFilePath = "ProjectSQ.Utils.config.txt";
 
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -43,10 +57,46 @@ namespace ProjectSQ.Models
                             string key = parts[0].Trim();
                             string value = parts[1].Trim();
 
+                            switch (key)
+                            {
+                                case "internalMemory":
+                                    if (ushort.TryParse(value, out ushort internalMemorySize))
+                                        internalMemory = new string[internalMemorySize];
+
+                                    break;
+                                case "programData":
+                                    if (ushort.TryParse(value, out ushort programDataSize))
+                                    {
+                                        programData = new byte[programDataSize];
+                                        var memoryPart = programDataSize / 8;
+                                        startStack = (ushort)(7 * memoryPart + 1);
+                                        endStack = programDataSize;
+                                        Processor.StackPointer = startStack;
+                                    }
+                                    break;
+                                case "keyboardBufferIndex":
+                                    if (ushort.TryParse(value, out ushort keyboardBufferLocation))
+                                    {
+                                        keyboardBufferIndex = keyboardBufferLocation;
+                                    }
+                                    break;
+                                case "videoMemoryStartIndex":
+                                    if (ushort.TryParse(value, out ushort videoMemoryStartIndex))
+                                    {
+                                        currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = videoMemoryStartIndex;
+                                    }
+                                    break;
+                                case "videoMemorySize":
+                                    if (ushort.TryParse(value, out ushort videoMemorySize))
+                                    {
+                                        maxIndexOfMemoryVideo = videoMemorySize;
+                                    }
+                                    break;
+
+                            }
+
                             if (key == "internalMemory")
                             {
-                                if (ushort.TryParse(value, out ushort arraySize))
-                                    internalMemory = new string[arraySize];
                             }
 
                             else if (key == "programData")
@@ -56,8 +106,7 @@ namespace ProjectSQ.Models
                                     programData = new byte[arraySize];
                                     ushort memoryPart = (ushort)(arraySize / 8);
                                     keyboardBufferIndex = (ushort)(5 * memoryPart);
-                                    firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
-                                    currentIndexMemoryVideo = firstVideoMemoryIndex;
+                                    currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
                                     maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
                                     startStack = (ushort)(maxIndexOfMemoryVideo + 1);
                                     endStack = arraySize;
@@ -67,6 +116,17 @@ namespace ProjectSQ.Models
                     }
                 }
             }
+        }
+
+        public static void WipeVideoMemory()
+        {
+            for (int i = firstVideoMemoryIndex; i < lastIndexOfMemoryVideo; i++)
+            {
+                Memory.programData[i] = default;
+            }
+
+            currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
+
         }
     }
 

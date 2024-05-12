@@ -40,11 +40,26 @@ export class AppSignalRService {
     });
   }
 
+  receiveExecutionResult(): Observable<any> {
+    return new Observable<string>((observer) => {
+      this.hubConnection.on(
+        'ReceiveExecutionResult',
+        (executionResult: any) => {
+          observer.next(executionResult);
+        }
+      );
+    });
+  }
+
   sendMessage(message: string): void {
     this.hubConnection.invoke('SendMessage', message);
   }
 
   sendBackspace(): void {
     this.hubConnection.invoke('SendBackspace');
+  }
+
+  sendWipeVideoMemory(): void {
+    this.hubConnection.invoke('SendWipeVideoMemory');
   }
 }

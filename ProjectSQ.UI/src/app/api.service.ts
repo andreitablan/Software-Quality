@@ -12,4 +12,8 @@ export class ApiService {
       .post<Boolean>('http://localhost:5135/api/memory/letter', letter)
       .subscribe();
   }
+
+  execute() {
+    return this.httpClient.get('http://localhost:5135/api/execute');
+  }
 }

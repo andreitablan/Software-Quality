@@ -1,13 +1,21 @@
-﻿using ProjectSQ.Interfaces.Processor;
+﻿using Microsoft.AspNetCore.SignalR;
+using ProjectSQ.Interfaces.Memory;
+using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ProjectSQ.Services
 {
     public partial class ProcessorService : IProcessorService
     {
+        private readonly IHubContext<RealTimeHub> hubContext;
+        private readonly IMemoryService memoryService;
+
+        public ProcessorService(IHubContext<RealTimeHub> hubContext, IMemoryService memoryService)
+        {
+            this.hubContext = hubContext;
+            this.memoryService = memoryService;
+        }
 
         public void ExecuteFile()
         {
@@ -112,6 +120,10 @@ namespace ProjectSQ.Services
                         break;
                 }
             }
+            var executionResult = new ExecutionResult();
+            executionResult.Registers = LoadResultRegisters();
+            executionResult.Memory = memoryService.LoadMemoryData();
+            this.hubContext.Clients.All.SendAsync("ReceiveExecutionResult", executionResult);
         }
 
         public bool Assignment(string operandOne, string operandTwo)
@@ -502,7 +514,7 @@ namespace ProjectSQ.Services
             ushort valueStack = ReadValueFromMemory(Processor.StackPointer);
             Memory.programData[Processor.StackPointer] = 0;
             Memory.programData[Processor.StackPointer + 1] = 0;
-            
+
             Processor.registerDictionary[operand] = valueStack;
         }
 
@@ -535,10 +547,13 @@ namespace ProjectSQ.Services
         }
         public void Read(string operand)
         {
+
+            this.hubContext.Clients.All.SendAsync("ReadOpearion");
+
             ushort result = 0;
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
             {
-                result = (ushort)(result * 10 + (ushort)((char)(Memory.programData[Memory.currentIndexMemoryVideo])));
+                result = (ushort)(result * 10 + ((char)(Memory.programData[Memory.currentIndexMemoryVideo]) - '0'));
                 Memory.currentIndexMemoryVideo++;
             }
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] == ' ')
@@ -562,12 +577,8 @@ namespace ProjectSQ.Services
         }
         public void ResetData()
         {
-            foreach (var kvp in Processor.registerDictionary)
-                Processor.registerDictionary[kvp.Key] = 0;
-            Memory.currentInstruction = 0;
-            for (int i = 0; i < Memory.programData.Length; i++)
-                Memory.programData[i] = 0;
-            Processor.StackPointer = Memory.startStack;
+            Processor.InitProcessor();
+            Memory.InitMemory();
         }
 
         public void WriteValueToKeyboardBuffer(ushort value)
@@ -577,7 +588,7 @@ namespace ProjectSQ.Services
             Memory.isKeyboardBufferChanged = true;
         }
 
-        public void WriteToVideoMemory()
+        public static void WriteToVideoMemory()
         {
             while (true)
             {

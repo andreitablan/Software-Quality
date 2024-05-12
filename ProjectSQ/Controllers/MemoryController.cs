@@ -24,8 +24,8 @@ namespace ProjectSQ.Controllers
         [HttpGet]
         public ResultMemory GetMemoryValues()
         {
-            parseService.LoadInstructions("ProjectSQ.Utils.input.txt");
-            processorService.ExecuteFile();
+            //parseService.LoadInstructions("ProjectSQ.Utils.input.txt");
+            //processorService.ExecuteFile();
             var result = memoryService.LoadMemoryData();
             processorService.ResetData();
             return result;

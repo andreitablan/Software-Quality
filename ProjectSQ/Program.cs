@@ -41,14 +41,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
-Task.Run(() =>
-{
-
-    var processorService = new ProcessorService();
-    processorService.WriteToVideoMemory();
-});
-
 Memory.InitMemory();
+Processor.InitProcessor();
+
+Task.Run(action: ProcessorService.WriteToVideoMemory);
+
 
 var app = builder.Build();
 
