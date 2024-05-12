@@ -58,4 +58,8 @@ export class AppSignalRService {
   sendBackspace(): void {
     this.hubConnection.invoke('SendBackspace');
   }
+
+  sendWipeVideoMemory(): void {
+    this.hubConnection.invoke('SendWipeVideoMemory');
+  }
 }

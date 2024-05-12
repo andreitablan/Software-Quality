@@ -57,10 +57,46 @@ namespace ProjectSQ.Models
                             string key = parts[0].Trim();
                             string value = parts[1].Trim();
 
+                            switch (key)
+                            {
+                                case "internalMemory":
+                                    if (ushort.TryParse(value, out ushort internalMemorySize))
+                                        internalMemory = new string[internalMemorySize];
+
+                                    break;
+                                case "programData":
+                                    if (ushort.TryParse(value, out ushort programDataSize))
+                                    {
+                                        programData = new byte[programDataSize];
+                                        var memoryPart = programDataSize / 8;
+                                        startStack = (ushort)(7 * memoryPart + 1);
+                                        endStack = programDataSize;
+                                        Processor.StackPointer = startStack;
+                                    }
+                                    break;
+                                case "keyboardBufferIndex":
+                                    if (ushort.TryParse(value, out ushort keyboardBufferLocation))
+                                    {
+                                        keyboardBufferIndex = keyboardBufferLocation;
+                                    }
+                                    break;
+                                case "videoMemoryStartIndex":
+                                    if (ushort.TryParse(value, out ushort videoMemoryStartIndex))
+                                    {
+                                        currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = videoMemoryStartIndex;
+                                    }
+                                    break;
+                                case "videoMemorySize":
+                                    if (ushort.TryParse(value, out ushort videoMemorySize))
+                                    {
+                                        maxIndexOfMemoryVideo = videoMemorySize;
+                                    }
+                                    break;
+
+                            }
+
                             if (key == "internalMemory")
                             {
-                                if (ushort.TryParse(value, out ushort arraySize))
-                                    internalMemory = new string[arraySize];
                             }
 
                             else if (key == "programData")
@@ -81,6 +117,17 @@ namespace ProjectSQ.Models
                     }
                 }
             }
+        }
+
+        public static void WipeVideoMemory()
+        {
+            for (int i = firstVideoMemoryIndex; i < lastIndexOfMemoryVideo; i++)
+            {
+                Memory.programData[i] = default;
+            }
+
+            currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
+
         }
     }
 

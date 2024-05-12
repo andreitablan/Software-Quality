@@ -65,9 +65,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   sendWipeVideoMemory(): void {
-    for (let i = 0; i < this.receivedMessage.length; i++) {
-      this.sendBackspace();
-    }
+    this.signalRService.sendWipeVideoMemory();
   }
 
   ngAfterViewInit() {

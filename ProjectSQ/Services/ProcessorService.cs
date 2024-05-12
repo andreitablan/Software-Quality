@@ -543,6 +543,9 @@ namespace ProjectSQ.Services
         }
         public void Read(string operand)
         {
+
+            this.hubContext.Clients.All.SendAsync("ReadOpearion");
+
             ushort result = 0;
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
             {
