@@ -1,0 +1,7 @@
+mov reg1,7
+mov reg2,3
+and reg1,reg2
+mov mem[3],reg1
+mov mem[10],5
+mov mem[20],13
+and mem[20],mem[10]

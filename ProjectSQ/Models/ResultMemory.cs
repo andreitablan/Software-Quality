@@ -11,7 +11,13 @@
             {
                 if (memory[i] != 0)
                 {
-                    NonZeroValues.Add(new NonZeroValue { Position = i, Value = memory[i] });
+                    NonZeroValue nonZeroValue = new NonZeroValue
+                    {
+                        Position = i,
+                        LowBits = Convert.ToString(memory[i], 2).PadLeft(8, '0'),
+                        HighBits = Convert.ToString(memory[i + 1], 2).PadLeft(8, '0')
+                    };
+                    NonZeroValues.Add(nonZeroValue);
                 }
             }
         }

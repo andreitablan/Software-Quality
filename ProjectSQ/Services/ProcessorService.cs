@@ -40,7 +40,7 @@ namespace ProjectSQ.Services
                         isInputFileGood = Division(operands[0], operands[1]);
                         break;
                     case "not":
-                        isInputFileGood = Not(words[0]);
+                        isInputFileGood = Not(words[1]);
                         break;
                     case "and":
                         operands = words[1].Split(",");
@@ -87,6 +87,8 @@ namespace ProjectSQ.Services
                     case "jg":
                         JumpIfGreaterThan(words[1]);
                         break;
+                    case "label":
+                        break;
                     case "push":
                         Push(words[1]);
                         break;
@@ -96,10 +98,13 @@ namespace ProjectSQ.Services
                     case "call":
                         Call(words[1]);
                         break;
+                    case "function":
+                        break;
                     case "ret":
                         Return();
                         break;
                     case "read":
+                        Read(words[1]);
                         break;
                 }
             }
@@ -446,7 +451,7 @@ namespace ProjectSQ.Services
             for (ushort index = 0; index < Memory.internalMemory.Length; index++)
                 if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
                 {
-                    Memory.currentInstruction = Math.Min((ushort)(index + 1), Memory.instructionsNumber);
+                    Memory.currentInstruction = index;
                     break;
                 }
         }
@@ -508,9 +513,9 @@ namespace ProjectSQ.Services
             WriteValueToMemory(Processor.StackPointer, Memory.currentInstruction);
             Processor.StackPointer += 2;
             for (ushort index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Split(' ')[1] == functionName && Memory.internalMemory[index].Split(' ')[0] == "call")
+                if (Memory.internalMemory[index].Split(' ')[1] == functionName && Memory.internalMemory[index].Split(' ')[0] == "function")
                 {
-                    Memory.currentInstruction = Math.Min((ushort)(index + 1), Memory.instructionsNumber);
+                    Memory.currentInstruction = index;
                     break;
                 }
 
@@ -537,7 +542,6 @@ namespace ProjectSQ.Services
                 Memory.currentIndexMemoryVideo++;
             }
             Processor.registerDictionary[operand] = result;
-
         }
         public ResultRegisters LoadResultRegisters()
         {
@@ -606,19 +610,19 @@ namespace ProjectSQ.Services
             Memory.programData[Memory.lastIndexOfMemoryVideo] = 0;
         }
 
-        private void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
+        private static void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
         {
             byte highByte = (byte)(valueOperandTwo >> 8);
             byte lowByte = (byte)(valueOperandTwo & 0xFF);
 
             // write to two consecutive addresses
-            Memory.programData[indexOperandOne] = highByte;
-            Memory.programData[indexOperandOne + 1] = lowByte;
+            Memory.programData[indexOperandOne] = lowByte;
+            Memory.programData[indexOperandOne + 1] = highByte;
         }
         private static ushort ReadValueFromMemory(int index)
         {
-            byte highByte = Memory.programData[index];
-            byte lowByte = Memory.programData[index + 1];
+            byte lowByte = Memory.programData[index];
+            byte highByte = Memory.programData[index + 1];
             ushort result = (ushort)((highByte << 8) | lowByte);
             return result;
         }

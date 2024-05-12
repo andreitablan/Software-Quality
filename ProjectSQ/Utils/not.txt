@@ -1,0 +1,2 @@
+mov reg1,10
+not reg1

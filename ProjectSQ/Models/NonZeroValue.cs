@@ -3,6 +3,7 @@
     public class NonZeroValue
     {
         public int Position { get; set; }
-        public ushort Value { get; set; }
+        public string LowBits { get; set; }
+        public string HighBits { get; set; }
     }
 }

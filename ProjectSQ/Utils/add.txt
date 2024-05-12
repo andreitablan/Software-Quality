@@ -1,0 +1,10 @@
+add reg1,10
+add reg2,10
+add reg2,reg1
+add mem[10],reg2
+add mem[4],mem[reg1]
+add mem[4],mem[4]
+add mem[4],20
+add mem[4],reg2
+add reg3,mem[4]
+add reg2,15

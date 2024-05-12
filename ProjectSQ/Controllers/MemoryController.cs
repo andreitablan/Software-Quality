@@ -27,7 +27,7 @@ namespace ProjectSQ.Controllers
             parseService.LoadInstructions("ProjectSQ.Utils.input.txt");
             processorService.ExecuteFile();
             var result = memoryService.LoadMemoryData();
-            //processorService.ResetData();
+            processorService.ResetData();
             return result;
         }
     }

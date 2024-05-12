@@ -1,0 +1,8 @@
+mov reg1,10
+cmp reg1,8
+jl maiMic
+jmp final
+label maiMic
+mov reg2,4
+label final
+mov reg3,20
