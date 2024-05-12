@@ -1,3 +1,4 @@
+main
 add reg1,10
 add reg2,10
 add reg2,reg1

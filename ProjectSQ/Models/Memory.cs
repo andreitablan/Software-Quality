@@ -61,7 +61,6 @@ namespace ProjectSQ.Models
                                     maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
                                     startStack = (ushort)(maxIndexOfMemoryVideo + 1);
                                     endStack = arraySize;
-                                    Processor.StackPointer = startStack;
                                 }
                             }
                         }

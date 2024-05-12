@@ -1,3 +1,4 @@
+main
 mov reg1,7
 mov reg2,3
 and reg1,reg2

@@ -19,6 +19,8 @@ namespace ProjectSQ.Services
                 string operation = words[0];
                 switch (operation)
                 {
+                    case "main":
+                        break;
                     case "mov":
                         string[] operands = words[1].Split(",");
                         isInputFileGood = Assignment(operands[0], operands[1]);
@@ -100,11 +102,13 @@ namespace ProjectSQ.Services
                         break;
                     case "function":
                         break;
-                    case "ret":
+                    case "return":
                         Return();
                         break;
                     case "read":
                         Read(words[1]);
+                        break;
+                    default:
                         break;
                 }
             }

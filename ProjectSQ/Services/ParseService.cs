@@ -25,9 +25,13 @@ namespace ProjectSQ.Services
                     while ((line = reader.ReadLine()) != null)
                     {
                         Memory.internalMemory[index] = line;
+                        if (line.Contains("main"))
+                            Memory.currentInstruction = index;
                         index++;
                     }
                     Memory.instructionsNumber = index;
+                    Processor.StackPointer = Memory.startStack;
+
                 }
             }
         }

@@ -1,0 +1,8 @@
+push 2
+mov reg1,10
+push reg1
+mov mem[3],20
+push reg2
+pop reg3
+pop reg4
+pop reg5

@@ -1,3 +1,4 @@
+main
 mov reg1,10
 cmp reg1,8
 jl maiMic
