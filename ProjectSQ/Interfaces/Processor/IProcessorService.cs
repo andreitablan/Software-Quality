@@ -39,8 +39,11 @@ namespace ProjectSQ.Interfaces.Processor
 
         // Function Call/Return
         void Call(string functionName);
-        //void Return();
-
+        void Return();
+        //read
+        void Read(string operand);
+        
+        //helper functions
         ResultRegisters LoadResultRegisters();
         void ResetData();
 

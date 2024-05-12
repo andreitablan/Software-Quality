@@ -2,6 +2,7 @@
 using ProjectSQ.Models;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ProjectSQ.Services
 {
@@ -22,7 +23,6 @@ namespace ProjectSQ.Services
                         string[] operands = words[1].Split(",");
                         isInputFileGood = Assignment(operands[0], operands[1]);
                         break;
-
                     case "add":
                         operands = words[1].Split(",");
                         isInputFileGood = Addition(operands[0], operands[1]);
@@ -94,10 +94,12 @@ namespace ProjectSQ.Services
                         Pop(words[1]);
                         break;
                     case "call":
+                        Call(words[1]);
                         break;
                     case "ret":
+                        Return();
                         break;
-                    default:
+                    case "read":
                         break;
                 }
             }
@@ -522,7 +524,21 @@ namespace ProjectSQ.Services
             if (Memory.currentInstruction < Memory.instructionsNumber)
                 Memory.currentInstruction++;
         }
+        public void Read(string operand)
+        {
+            ushort result = 0;
+            while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
+            {
+                result = (ushort)(result * 10 + (ushort)((char)(Memory.programData[Memory.currentIndexMemoryVideo])));
+                Memory.currentIndexMemoryVideo++;
+            }
+            while ((char)Memory.programData[Memory.currentIndexMemoryVideo] == ' ')
+            {
+                Memory.currentIndexMemoryVideo++;
+            }
+            Processor.registerDictionary[operand] = result;
 
+        }
         public ResultRegisters LoadResultRegisters()
         {
             ResultRegisters resultRegisters = new ResultRegisters();

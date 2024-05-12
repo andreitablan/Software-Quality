@@ -13,6 +13,7 @@ namespace ProjectSQ.Models
         public static ushort keyboardBufferIndex = 50000;
         public static bool isKeyboardBufferChanged = false;
         public static ushort firstVideoMemoryIndex = 50001;
+        public static ushort currentIndexMemoryVideo = 50001;
         public static ushort lastIndexOfMemoryVideo = 50001;
         public static ushort maxIndexOfMemoryVideo = 60000;
 
@@ -56,6 +57,7 @@ namespace ProjectSQ.Models
                                     ushort memoryPart = (ushort)(arraySize / 8);
                                     keyboardBufferIndex = (ushort)(5 * memoryPart);
                                     firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
+                                    currentIndexMemoryVideo = firstVideoMemoryIndex;
                                     maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
                                     startStack = (ushort)(maxIndexOfMemoryVideo + 1);
                                     endStack = arraySize;
