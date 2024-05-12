@@ -30,12 +30,5 @@ namespace ProjectSQ.Controllers
             //processorService.ResetData();
             return result;
         }
-
-        [HttpPost("letter")]
-        public void PostLetter([FromBody] string letter)
-        {
-            char character = letter[0];
-            processorService.WriteValueToKeyboardBuffer((ushort)character);
-        }
     }
 }

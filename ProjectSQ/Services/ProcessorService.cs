@@ -6,6 +6,7 @@ namespace ProjectSQ.Services
 {
     public partial class ProcessorService : IProcessorService
     {
+
         public void ExecuteFile()
         {
             bool isInputFileGood = true;
@@ -538,8 +539,28 @@ namespace ProjectSQ.Services
                     Memory.isKeyboardBufferChanged = false;
 
 
+
                 }
             }
+        }
+
+        public string ReadFromVideoMemory()
+        {
+            var result = "";
+
+            for (int i = Memory.firstVideoMemoryIndex; i < Memory.lastIndexOfMemoryVideo; i++)
+            {
+                result += ((char)Memory.programData[i]).ToString();
+            }
+
+            return result;
+        }
+
+        public void RemoveFromVideoMemory()
+        {
+            Memory.lastIndexOfMemoryVideo--;
+
+            Memory.programData[Memory.lastIndexOfMemoryVideo] = 0;
         }
 
         private void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
@@ -558,6 +579,8 @@ namespace ProjectSQ.Services
             ushort result = (ushort)((highByte << 8) | lowByte);
             return result;
         }
+
+
         private static ushort GetValue(string operand)
         {
             //second operand is a data register

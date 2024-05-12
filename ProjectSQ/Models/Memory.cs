@@ -13,6 +13,7 @@ namespace ProjectSQ.Models
         public static bool isKeyboardBufferChanged = false;
         public static int lastIndexOfMemoryVideo = 50001;
         public static int maxIndexOfMemoryVideo = 60000;
+        public static int firstVideoMemoryIndex = 50001;
 
 
         public static void InitMemory()
@@ -53,7 +54,7 @@ namespace ProjectSQ.Models
                                     programData = new byte[arraySize];
                                     var memoryPart = arraySize / 8;
                                     keyboardBufferIndex = 5 * memoryPart;
-                                    lastIndexOfMemoryVideo = keyboardBufferIndex + 1;
+                                    firstVideoMemoryIndex = lastIndexOfMemoryVideo = keyboardBufferIndex + 1;
                                     maxIndexOfMemoryVideo = 7 * memoryPart;
                                     startStack = maxIndexOfMemoryVideo + 1;
                                     endStack = arraySize;

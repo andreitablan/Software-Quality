@@ -35,8 +35,11 @@ builder.Services.AddCors(options =>
             policyBuilder.WithOrigins(allowedCorsHosts ?? new[] { "*" });
             policyBuilder.AllowAnyHeader();
             policyBuilder.AllowAnyMethod();
+            policyBuilder.AllowCredentials();
         });
 });
+
+builder.Services.AddSignalR();
 
 Task.Run(() =>
 {
@@ -63,5 +66,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<RealTimeHub>("hub");
 
 app.Run();

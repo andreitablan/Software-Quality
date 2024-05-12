@@ -46,5 +46,9 @@ namespace ProjectSQ.Interfaces.Processor
 
         //keyboard memory
         void WriteValueToKeyboardBuffer(ushort value);
+
+        //video memory
+        string ReadFromVideoMemory();
+        void RemoveFromVideoMemory();
     }
 }
