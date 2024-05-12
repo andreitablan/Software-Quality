@@ -94,24 +94,6 @@ namespace ProjectSQ.Models
                                     break;
 
                             }
-
-                            if (key == "internalMemory")
-                            {
-                            }
-
-                            else if (key == "programData")
-                            {
-                                if (ushort.TryParse(value, out ushort arraySize))
-                                {
-                                    programData = new byte[arraySize];
-                                    ushort memoryPart = (ushort)(arraySize / 8);
-                                    keyboardBufferIndex = (ushort)(5 * memoryPart);
-                                    currentIndexMemoryVideo = firstVideoMemoryIndex = lastIndexOfMemoryVideo = (ushort)(keyboardBufferIndex + 1);
-                                    maxIndexOfMemoryVideo = (ushort)(7 * memoryPart);
-                                    startStack = (ushort)(maxIndexOfMemoryVideo + 1);
-                                    endStack = arraySize;
-                                }
-                            }
                         }
                     }
                 }

@@ -1,12 +1,9 @@
-function test
-mov reg3,15
-mov reg4,20
-add reg5,reg3
-add reg5,reg4
-return
-
 main
 mov reg1,10
-mov reg2,20
-call test
-mov reg8,reg7
+mov reg2,reg1
+mov mem[10],reg2
+mov mem[30],258
+mov reg3,mem[10]
+mov reg4,mem[reg1]
+mov mem[4],mem[reg1]
+mov mem[25],500 
