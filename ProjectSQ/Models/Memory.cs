@@ -12,6 +12,7 @@ namespace ProjectSQ.Models
 
         public static ushort keyboardBufferIndex = 50000;
         public static bool isKeyboardBufferChanged = false;
+        public static ushort firstVideoMemoryIndex = 50001;
         public static ushort lastIndexOfMemoryVideo = 50001;
         public static ushort maxIndexOfMemoryVideo = 60000;
 

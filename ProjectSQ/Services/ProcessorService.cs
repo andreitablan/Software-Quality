@@ -567,9 +567,6 @@ namespace ProjectSQ.Services
                     }
 
                     Memory.isKeyboardBufferChanged = false;
-
-
-
                 }
             }
         }

@@ -21,7 +21,7 @@ namespace ProjectSQ.Services
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     string line;
-                    var index = 0;
+                    ushort index = 0;
                     while ((line = reader.ReadLine()) != null)
                     {
                         Memory.internalMemory[index] = line;
