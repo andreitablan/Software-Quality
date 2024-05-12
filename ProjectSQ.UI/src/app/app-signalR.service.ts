@@ -40,6 +40,17 @@ export class AppSignalRService {
     });
   }
 
+  receiveExecutionResult(): Observable<string> {
+    return new Observable<string>((observer) => {
+      this.hubConnection.on(
+        'ReceiveExecutionResult',
+        (executionResult: any) => {
+          observer.next(executionResult);
+        }
+      );
+    });
+  }
+
   sendMessage(message: string): void {
     this.hubConnection.invoke('SendMessage', message);
   }

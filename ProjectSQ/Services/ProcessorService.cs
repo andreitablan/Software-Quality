@@ -1,13 +1,21 @@
-﻿using ProjectSQ.Interfaces.Processor;
+﻿using Microsoft.AspNetCore.SignalR;
+using ProjectSQ.Interfaces.Memory;
+using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ProjectSQ.Services
 {
     public partial class ProcessorService : IProcessorService
     {
+        private readonly IHubContext<RealTimeHub> hubContext;
+        private readonly IMemoryService memoryService;
+
+        public ProcessorService(IHubContext<RealTimeHub> hubContext, IMemoryService memoryService)
+        {
+            this.hubContext = hubContext;
+            this.memoryService = memoryService;
+        }
 
         public void ExecuteFile()
         {
@@ -108,6 +116,10 @@ namespace ProjectSQ.Services
                         break;
                 }
             }
+            var executionResult = new ExecutionResult();
+            executionResult.Registers = LoadResultRegisters();
+            executionResult.Memory = memoryService.LoadMemoryData();
+            this.hubContext.Clients.All.SendAsync("ReceiveExecutionResult", executionResult);
         }
 
         public bool Assignment(string operandOne, string operandTwo)
@@ -498,7 +510,7 @@ namespace ProjectSQ.Services
             ushort valueStack = ReadValueFromMemory(Processor.StackPointer);
             Memory.programData[Processor.StackPointer] = 0;
             Memory.programData[Processor.StackPointer + 1] = 0;
-            
+
             Processor.registerDictionary[operand] = valueStack;
         }
 
@@ -573,7 +585,7 @@ namespace ProjectSQ.Services
             Memory.isKeyboardBufferChanged = true;
         }
 
-        public void WriteToVideoMemory()
+        public static void WriteToVideoMemory()
         {
             while (true)
             {

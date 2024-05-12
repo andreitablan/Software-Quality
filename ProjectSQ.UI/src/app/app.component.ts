@@ -18,6 +18,7 @@ export class AppComponent implements AfterViewInit {
   value = '';
   keyboard!: Keyboard;
   receivedMessage: string = '';
+  executionResult: any;
 
   constructor(
     private apiService: ApiService,
@@ -29,6 +30,12 @@ export class AppComponent implements AfterViewInit {
       this.signalRService.receiveMessage().subscribe((message) => {
         this.receivedMessage = message;
       });
+
+      this.signalRService
+        .receiveExecutionResult()
+        .subscribe((executionResult) => {
+          this.executionResult = executionResult;
+        });
     });
 
     window.addEventListener('unload', () => {
@@ -120,4 +127,10 @@ export class AppComponent implements AfterViewInit {
     });
     this.sendMessage('\n');
   };
+
+  execute() {
+    this.apiService.execute().subscribe((x) => {
+      console.log('execution');
+    });
+  }
 }
