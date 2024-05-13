@@ -9,3 +9,5 @@ add mem[4],20
 add mem[4],reg2
 add reg3,mem[4]
 add reg2,15
+
+
