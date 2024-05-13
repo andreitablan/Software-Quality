@@ -6,3 +6,4 @@
         public ResultMemory Memory { get; set; }
     }
 }
+
