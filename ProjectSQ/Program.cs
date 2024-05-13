@@ -6,18 +6,13 @@ using ProjectSQ.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers(options =>
 {
-    // Clear the existing formatters
     options.InputFormatters.Clear();
-
-    // Add the custom plain text input formatter
     options.InputFormatters.Add(new PlainTextInputFormatter());
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -49,7 +44,6 @@ Task.Run(action: ProcessorService.WriteToVideoMemory);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

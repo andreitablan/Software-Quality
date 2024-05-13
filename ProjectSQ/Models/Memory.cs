@@ -7,7 +7,7 @@ namespace ProjectSQ.Models
         public static ushort startStack = 60000, endStack = 65535;
         public static ushort currentInstruction = 0;
         public static string[] internalMemory = new string[1024];
-        public static byte[] programData = new byte[65536];//0->60.000 mem, restul stack
+        public static byte[] programData = new byte[65536];
         public static ushort instructionsNumber = 0;
 
         public static ushort keyboardBufferIndex = 50000;
@@ -25,7 +25,7 @@ namespace ProjectSQ.Models
             endStack = 65535;
             currentInstruction = 0;
             internalMemory = new string[1024];
-            programData = new byte[65536];//0->60.000 mem, restul stack
+            programData = new byte[65536];
             instructionsNumber = 0;
 
             keyboardBufferIndex = 50000;

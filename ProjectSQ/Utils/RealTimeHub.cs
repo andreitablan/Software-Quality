@@ -42,9 +42,5 @@ public class RealTimeHub : Hub
         {
             processorService.WriteValueToKeyboardBuffer(item);
         }
-
-        //processorService.SaveTo
-        //var videoMemoryValue = processorService.ReadFromVideoMemory();
-        //await Clients.All.SendAsync("ReceiveMessage", videoMemoryValue);
     }
 }

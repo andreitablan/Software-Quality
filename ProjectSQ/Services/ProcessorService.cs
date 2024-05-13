@@ -154,7 +154,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, valueOperandTwo);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Addition(string operandOne, string operandTwo)
@@ -182,7 +181,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Subtraction(string operandOne, string operandTwo)
@@ -211,7 +209,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Multiplication(string operandOne, string operandTwo)
@@ -239,7 +236,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Division(string operandOne, string operandTwo)
@@ -267,7 +263,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Not(string operandOne)
@@ -317,7 +312,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Or(string operandOne, string operandTwo)
@@ -345,7 +339,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Xor(string operandOne, string operandTwo)
@@ -373,7 +366,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool ShiftLeft(string operandOne, string operandTwo)
@@ -401,7 +393,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool ShiftRight(string operandOne, string operandTwo)
@@ -429,7 +420,6 @@ namespace ProjectSQ.Services
                 WriteValueToMemory(indexOperandOne, result);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public bool Compare(string operandOne, string operandTwo)
@@ -450,7 +440,6 @@ namespace ProjectSQ.Services
                 return true;
             }
             //operandOne is a memory location
-            //TODO: add checks if the memory location is valid
             if (operandOne.Contains("mem["))
             {
                 int indexOperandOne = GetMemoryIndex(operandOne);
@@ -459,7 +448,6 @@ namespace ProjectSQ.Services
                 SetCompareFlags(valueOperandOne, valueOperandTwo);
                 return true;
             }
-            //here is an error, not good
             return false;
         }
         public void Jump(string label)
@@ -660,9 +648,6 @@ namespace ProjectSQ.Services
             int index = GetMemoryIndex(operand);
             ushort result = ReadValueFromMemory(index);
             return result;
-
-            //NOTE: case if the memory location is invalid
-            //now, we consider the input file does not have errors
         }
 
         private static ushort GetMemoryIndex(string operand)
@@ -680,9 +665,6 @@ namespace ProjectSQ.Services
             //address specified by a data register
             Processor.registerDictionary.TryGetValue(indexStr, out index);
             return index;
-
-            //NOTE: case if the memory location is invalid
-            //now, we consider the input file does not have errors
         }
 
         private static void SetCompareFlags(ushort operandValueOne, ushort operandValueTwo)
@@ -731,7 +713,6 @@ namespace ProjectSQ.Services
 
                 return;
             }
-            Console.Write("Error: Other case in Compare function");
         }
 
         [GeneratedRegex(@"^\d+$")]
