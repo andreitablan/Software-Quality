@@ -5,6 +5,7 @@ using ProjectSQ.Interfaces.Memory;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
 using ProjectSQ.Services;
+using Xunit;
 
 namespace ProjectSQ.Tests.ProcessorServiceTests
 {
