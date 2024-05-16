@@ -116,8 +116,6 @@ namespace ProjectSQ.Services
                     case "read":
                         Read(words[1]);
                         break;
-                    default:
-                        break;
                 }
             }
             var executionResult = new ExecutionResult();

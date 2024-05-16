@@ -76,6 +76,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
         public void Assignment_Should_Return_False_For_Location_Beyond_Keyboard_Buffer()
         {
             // Arrange
+            
             var operandOne = "mem[60001]";
             var operandTwo = "999";
             Processor.InitProcessor();
@@ -84,6 +85,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Act
             var result = sut.Assignment(operandOne, operandTwo);
 
+            // Assert
             result.Should().Be(false);
         }
     }
