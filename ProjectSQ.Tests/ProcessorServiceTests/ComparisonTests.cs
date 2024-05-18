@@ -4,11 +4,10 @@ using ProjectSQ.Services;
 using ProjectSQ.Interfaces.Memory;
 using Moq;
 using Microsoft.AspNetCore.SignalR;
-using ProjectSQ.Models;
 
 namespace ProjectSQ.Tests.ProcessorServiceTests
 {
-    public class ComparisonTests : IDisposable
+    public class ComparisonTests
     {
         private readonly ProcessorService _processorService;
 
@@ -17,82 +16,38 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             Mock<IHubContext<RealTimeHub>> mockHubContext = new();
             Mock<IMemoryService> mockMemoryService = new();
             _processorService = new ProcessorService(mockHubContext.Object, mockMemoryService.Object);
-            _processorService.ResetData();
-        }
-
-        public void Dispose()
-        {
-            _processorService.ResetData();
         }
 
         [Fact]
-        public void Compare_SetsZeroFlag_WhenOperandsAreEqual()
+        public void Comparison_WithValidOperands_ShouldReturnTrue()
         {
             // Arrange
-            const ushort value1 = 100;
-            const ushort value2 = 100;
+            const string operand1 = "1";
+            const string operand2 = "2";
 
             // Act
-            _processorService.Compare(value1, value2);
+            var result = _processorService.Compare(operand1, operand2);
 
             // Assert
-            _processorService.ZeroFlag.Should().BeTrue();
+            result.Should().BeTrue();
+            // Add more assertions if needed
         }
 
         [Fact]
-        public void Compare_SetsCarryFlag_WhenFirstOperandIsGreater()
+        public void Comparison_WithInvalidOperands_ShouldReturnFalse()
         {
             // Arrange
-            const ushort value1 = 200;
-            const ushort value2 = 100;
+            const string operand1 = "t1";
+            const string operand2 = "t2";
 
             // Act
-            _processorService.Compare(value1, value2);
+            var result = _processorService.Compare(operand1, operand2);
 
             // Assert
-            _processorService.CarryFlag.Should().BeTrue();
+            result.Should().BeFalse();
+            // Add more assertions if needed
         }
 
-        [Fact]
-        public void Compare_SetsCarryFlag_WhenFirstOperandIsLess()
-        {
-            // Arrange
-            const ushort value1 = 50;
-            const ushort value2 = 100;
-
-            // Act
-            _processorService.Compare(value1, value2);
-
-            // Assert
-            _processorService.CarryFlag.Should().BeFalse();
-        }
-
-        [Fact]
-        public void Compare_SetsNegativeFlag_WhenFirstOperandIsLess()
-        {
-            // Arrange
-            const ushort value1 = 50;
-            const ushort value2 = 100;
-
-            // Act
-            _processorService.Compare(value1, value2);
-
-            // Assert
-            _processorService.NegativeFlag.Should().BeTrue();
-        }
-
-        [Fact]
-        public void Compare_SetsNegativeFlag_WhenFirstOperandIsNotLess()
-        {
-            // Arrange
-            const ushort value1 = 150;
-            const ushort value2 = 100;
-
-            // Act
-            _processorService.Compare(value1, value2);
-
-            // Assert
-            _processorService.NegativeFlag.Should().BeFalse();
-        }
+        // Add more test cases as needed
     }
 }
