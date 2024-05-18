@@ -1,6 +1,6 @@
 ﻿using ProjectSQ.Models;
 
-namespace ProjectSQ.Tests.ProcessorServiceTests
+namespace ProjectSQ.Tests.util
 {
     public static class MemoryActions
     {

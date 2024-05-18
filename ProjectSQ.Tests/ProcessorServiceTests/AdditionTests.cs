@@ -5,6 +5,7 @@ using ProjectSQ.Interfaces.Memory;
 using Moq;
 using Microsoft.AspNetCore.SignalR;
 using ProjectSQ.Models;
+using ProjectSQ.Tests.util;
 
 namespace ProjectSQ.Tests.ProcessorServiceTests
 {
