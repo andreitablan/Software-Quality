@@ -1,8 +1,11 @@
-﻿namespace ProjectSQ.Models
+﻿
+namespace ProjectSQ.Models
 {
     public class ResultMemory
     {
         public List<NonZeroValue> NonZeroValues { get; set; }
+        public IEnumerable<byte> Data { get; set; }
+
         public ResultMemory(byte[] memory)
         {
             NonZeroValues = new List<NonZeroValue>();
