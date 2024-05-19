@@ -120,5 +120,19 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             result.Should().BeTrue();
             Memory.programData[indexMemory1].Should().Be(40); // 10 << 2 == 40
         }
+
+        [Fact]
+        public void ShiftLeft_WithInvalidFirstOperand_ShouldFail()
+        {
+            // Arrange
+            const string invalidOperand = "invalid";
+            const string constantValue = "2";
+
+            // Act
+            var result = _processorService.ShiftLeft(invalidOperand, constantValue);
+
+            // Assert
+            result.Should().BeFalse();
+        }
     }
 }
