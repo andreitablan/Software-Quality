@@ -448,50 +448,76 @@ namespace ProjectSQ.Services
             }
             return false;
         }
-        public void Jump(string label)
+        public bool Jump(string label)
         {
             for (ushort index = 0; index < Memory.internalMemory.Length; index++)
                 if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
                 {
                     Memory.currentInstruction = index;
                     break;
+                    return true;
                 }
+            return false;
         }
 
-        public void JumpIfEqual(string label)
+        public bool JumpIfEqual(string label)
         {
             if (Processor.Equal)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
-        public void JumpIfNotEqual(string label)
+        public bool JumpIfNotEqual(string label)
         {
             if (Processor.NotEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
-        public void JumpIfLessThan(string label)
+        public bool JumpIfLessThan(string label)
         {
             if (Processor.Less)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
-        public void JumpIfGreaterThan(string label)
+        public bool JumpIfGreaterThan(string label)
         {
             if (Processor.Greater)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
-        public void JumpIfLessThanOrEqual(string label)
+        public bool JumpIfLessThanOrEqual(string label)
         {
             if (Processor.LessEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
-        public void JumpIfGreaterThanOrEqual(string label)
+        public bool JumpIfGreaterThanOrEqual(string label)
         {
             if (Processor.GreaterEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return true;
+            }
+            return false;
         }
 
         public void Pop(string operand)
