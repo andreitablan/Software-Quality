@@ -602,7 +602,7 @@ namespace ProjectSQ.Services
 
         public static void WriteToVideoMemory()
         {
-            while (true)
+            while (Memory.StopWriteToVideoMemory)
             {
                 if (Memory.isKeyboardBufferChanged)
                 {
