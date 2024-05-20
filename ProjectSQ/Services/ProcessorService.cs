@@ -22,7 +22,7 @@ namespace ProjectSQ.Services
             bool isInputFileGood = true;
             while (Memory.currentInstruction < Memory.instructionsNumber && isInputFileGood)
             {
-                string instruction = Memory.internalMemory[Memory.currentInstruction++];
+                string instruction = Memory.internalMemory[Memory.currentInstruction];
                 string[] words = instruction.Split(' ');
                 string operation = words[0];
                 switch (operation)
@@ -66,18 +66,18 @@ namespace ProjectSQ.Services
                         break;
                     case "shr":
                         operands = words[1].Split(",");
-                        isInputFileGood = ShiftLeft(operands[0], operands[1]);
+                        isInputFileGood = ShiftRight(operands[0], operands[1]);
                         break;
                     case "shl":
                         operands = words[1].Split(",");
-                        isInputFileGood = ShiftRight(operands[0], operands[1]);
+                        isInputFileGood = ShiftLeft(operands[0], operands[1]);
                         break;
                     case "cmp":
                         operands = words[1].Split(",");
                         Compare(operands[0], operands[1]);
                         break;
                     case "jmp":
-                        Jump(words[1]);
+                        isInputFileGood = Jump(words[1]);
                         break;
                     case "je":
                         JumpIfEqual(words[1]);
@@ -117,6 +117,7 @@ namespace ProjectSQ.Services
                         Read(words[1]);
                         break;
                 }
+                Memory.currentInstruction++;
             }
             var executionResult = new ExecutionResult();
             executionResult.Registers = LoadResultRegisters();
@@ -448,50 +449,75 @@ namespace ProjectSQ.Services
             }
             return false;
         }
-        public void Jump(string label)
+        public bool Jump(string label)
         {
-            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
+            for (ushort index = 0; index < Memory.instructionsNumber; index++)
+                if (Memory.internalMemory[index].Split(' ')[0] == "label" && Memory.internalMemory[index].Split(' ')[1] == label)
                 {
                     Memory.currentInstruction = index;
-                    break;
+                    return true;
                 }
+            return false;
         }
 
-        public void JumpIfEqual(string label)
+        public bool JumpIfEqual(string label)
         {
             if (Processor.Equal)
-                Jump(label);
+            {
+                var res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
-        public void JumpIfNotEqual(string label)
+        public bool JumpIfNotEqual(string label)
         {
             if (Processor.NotEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
-        public void JumpIfLessThan(string label)
+        public bool JumpIfLessThan(string label)
         {
             if (Processor.Less)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
-        public void JumpIfGreaterThan(string label)
+        public bool JumpIfGreaterThan(string label)
         {
             if (Processor.Greater)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
-        public void JumpIfLessThanOrEqual(string label)
+        public bool JumpIfLessThanOrEqual(string label)
         {
             if (Processor.LessEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
-        public void JumpIfGreaterThanOrEqual(string label)
+        public bool JumpIfGreaterThanOrEqual(string label)
         {
             if (Processor.GreaterEqual)
-                Jump(label);
+            {
+                bool res = Jump(label);
+                return res;
+            }
+            return true;
         }
 
         public void Pop(string operand)
@@ -514,8 +540,8 @@ namespace ProjectSQ.Services
         {
             WriteValueToMemory(Processor.StackPointer, Memory.currentInstruction);
             Processor.StackPointer += 2;
-            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Split(' ')[1] == functionName && Memory.internalMemory[index].Split(' ')[0] == "function")
+            for (ushort index = 0; index < Memory.instructionsNumber; index++)
+                if (Memory.internalMemory[index].Split(' ')[0] == "function" && Memory.internalMemory[index].Split(' ')[1] == functionName)
                 {
                     Memory.currentInstruction = index;
                     break;
@@ -528,8 +554,6 @@ namespace ProjectSQ.Services
             Memory.currentInstruction = ReadValueFromMemory(Processor.StackPointer);
             Memory.programData[Processor.StackPointer] = 0;
             Memory.programData[Processor.StackPointer + 1] = 0;
-            if (Memory.currentInstruction < Memory.instructionsNumber)
-                Memory.currentInstruction++;
         }
         public void Read(string operand)
         {
@@ -682,8 +706,8 @@ namespace ProjectSQ.Services
                 Processor.GreaterEqual = true;
 
                 Processor.NotEqual = false;
-                Processor.Less = operandValueOne <= operandValueTwo;
-                Processor.Greater = operandValueOne >= operandValueTwo;
+                Processor.Less = operandValueOne < operandValueTwo;
+                Processor.Greater = operandValueOne > operandValueTwo;
 
                 return;
             }
@@ -708,8 +732,6 @@ namespace ProjectSQ.Services
                 Processor.NotEqual = true;
                 Processor.Less = false;
                 Processor.Greater = true;
-
-                return;
             }
         }
 

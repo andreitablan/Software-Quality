@@ -121,5 +121,16 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             result.Should().BeTrue();
             Memory.programData[indexMemory1].Should().Be(10); // 40 >> 2 == 10
         }
+        [Fact]
+        public void Addition_WithInvalidOperands_ReturnsFalse()
+        {
+            // Arrange
+
+            // Act
+            var result = _processorService.ShiftRight("reg9", "reg1");
+
+            // Assert
+            result.Should().BeFalse();
+        }
     }
 }

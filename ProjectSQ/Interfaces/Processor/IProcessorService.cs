@@ -25,13 +25,13 @@ namespace ProjectSQ.Interfaces.Processor
         bool Compare(string operandOne, string operandTwo);
 
         // Jump Operations
-        void Jump(string label);
-        void JumpIfEqual(string label);
-        void JumpIfNotEqual(string label);
-        void JumpIfLessThan(string label);
-        void JumpIfGreaterThan(string label);
-        void JumpIfLessThanOrEqual(string label);
-        void JumpIfGreaterThanOrEqual(string label);
+        bool Jump(string label);
+        bool JumpIfEqual(string label);
+        bool JumpIfNotEqual(string label);
+        bool JumpIfLessThan(string label);
+        bool JumpIfGreaterThan(string label);
+        bool JumpIfLessThanOrEqual(string label);
+        bool JumpIfGreaterThanOrEqual(string label);
 
         // Stack Operations
         void Pop(string operand);
