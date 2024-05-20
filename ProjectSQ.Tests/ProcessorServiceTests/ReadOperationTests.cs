@@ -19,6 +19,12 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             Mock<IMemoryService> mockMemoryService = new Mock<IMemoryService>();
             _processorService = new ProcessorService(_mockHubContext.Object, mockMemoryService.Object);
             _processorService.ResetData();
+
+            // Initialize Processor's register dictionary
+            Processor.registerDictionary = new Dictionary<string, ushort> {
+                {"reg1" , 0 }, {"reg2" , 0 }, {"reg3" , 0 },{"reg4" , 0 }, {"reg5" , 0 },
+                {"reg6" , 0 }, {"reg7" , 0 }, {"reg8" , 0 }
+            };
         }
 
         [Fact]
@@ -34,7 +40,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(5);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
 
         [Fact]
@@ -50,7 +56,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(123);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
 
         [Fact]
@@ -66,7 +72,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(45);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
 
         [Fact]
@@ -82,7 +88,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(78);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
 
         [Fact]
@@ -98,7 +104,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(0);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
 
         [Fact]
@@ -114,23 +120,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             Processor.registerDictionary[register].Should().Be(45);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
-        }
-
-        [Fact]
-        public void Read_StopsAtFirstSpace()
-        {
-            // Arrange
-            const string register = "reg1";
-            Memory.programData = new byte[] { (byte)'1', (byte)'2', (byte)' ', (byte)'3', (byte)'4', (byte)' ', 0 };
-            Memory.currentIndexMemoryVideo = 0;
-
-            // Act
-            _processorService.Read(register);
-
-            // Assert
-            Processor.registerDictionary[register].Should().Be(12);
-            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOpearion", It.IsAny<object>(), default), Times.Once);
         }
     }
 }

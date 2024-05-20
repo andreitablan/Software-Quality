@@ -26,46 +26,61 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             Memory.internalMemory = new string[]
             {
+                "function test",
+                "mov reg3,15",
+                "mov reg4,20",
+                "add reg5,reg3",
+                "add reg5,reg4",
+                "return",
                 "main",
-                "mov reg1, 2",
-                "call func1",
-                "function func1",
-                "add reg1, reg2"
+                "mov reg1,10",
+                "mov reg2,20",
+                "call test",
+                "mov reg8,reg7"
             };
+
             Memory.instructionsNumber = (ushort)Memory.internalMemory.Length;
-            Memory.currentInstruction = 2;
+            Memory.currentInstruction = 6;
             Processor.StackPointer = 0;
 
             // Act
-            _processorService.Call("func1");
+            _processorService.Call("test");
 
             // Assert
-            Memory.currentInstruction.Should().Be(3);
-            Memory.programData[0].Should().Be(2);
+            Memory.currentInstruction.Should().Be(0);
+            Memory.programData[0].Should().Be(6);
             Processor.StackPointer.Should().Be(2);
         }
 
+        //Fails as we don't treat the case with invalid function call
         [Fact]
         public void Call_InvalidFunctionName_DoesNotChangeCurrentInstruction()
         {
             // Arrange
             Memory.internalMemory = new string[]
             {
+                "function test",
+                "mov reg3,15",
+                "mov reg4,20",
+                "add reg5,reg3",
+                "add reg5,reg4",
+                "return",
                 "main",
-                "mov reg1, 2",
-                "call func1",
-                "function func2",
-                "add reg1, reg2"
+                "mov reg1,10",
+                "mov reg2,20",
+                "call test1",
+                "mov reg8,reg7"
             };
+
             Memory.instructionsNumber = (ushort)Memory.internalMemory.Length;
-            Memory.currentInstruction = 2;
+            Memory.currentInstruction = 6;
             Processor.StackPointer = 0;
 
             // Act
-            _processorService.Call("func1");
+            _processorService.Call("test1");
 
             // Assert
-            Memory.currentInstruction.Should().Be(2);
+            Memory.currentInstruction.Should().Be(10);
             Processor.StackPointer.Should().Be(2);
         }
 
@@ -92,23 +107,28 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             Memory.internalMemory = new string[]
             {
+                "function test",
+                "mov reg3,15",
+                "mov reg4,20",
+                "add reg5,reg3",
+                "add reg5,reg4",
+                "return",
                 "main",
-                "mov reg1, 2",
-                "call func1",
-                "nop",
-                "nop",
-                "function func1",
-                "add reg1, reg2"
+                "mov reg1,10",
+                "mov reg2,20",
+                "call test",
+                "mov reg8,reg7"
             };
+
             Memory.instructionsNumber = (ushort)Memory.internalMemory.Length;
-            Memory.currentInstruction = 2;
+            Memory.currentInstruction = 6;
             Processor.StackPointer = 0;
 
             // Act
-            _processorService.Call("func1");
+            _processorService.Call("test");
 
             // Assert
-            Memory.currentInstruction.Should().Be(5);
+            Memory.currentInstruction.Should().Be(0);
             Processor.StackPointer.Should().Be(2);
         }
     }

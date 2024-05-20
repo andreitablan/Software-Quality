@@ -8,6 +8,10 @@ namespace ProjectSQ.Services
     {
         public void LoadInstructions(string file)
         {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file), "File name cannot be null.");
+            }
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             using (Stream stream = assembly.GetManifestResourceStream(file))
