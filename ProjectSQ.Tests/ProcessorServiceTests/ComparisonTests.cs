@@ -4,6 +4,8 @@ using ProjectSQ.Services;
 using ProjectSQ.Interfaces.Memory;
 using Moq;
 using Microsoft.AspNetCore.SignalR;
+using ProjectSQ.Models;
+using ProjectSQ.Tests.util;
 
 namespace ProjectSQ.Tests.ProcessorServiceTests
 {
@@ -16,6 +18,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             Mock<IHubContext<RealTimeHub>> mockHubContext = new();
             Mock<IMemoryService> mockMemoryService = new();
             _processorService = new ProcessorService(mockHubContext.Object, mockMemoryService.Object);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -30,6 +33,14 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
 
             // Assert
             result.Should().BeTrue();
+
+            Processor.Equal.Should().BeFalse();
+            Processor.LessEqual.Should().BeTrue();
+            Processor.GreaterEqual.Should().BeFalse();
+
+            Processor.NotEqual.Should().BeTrue();
+            Processor.Less.Should().BeTrue();
+            Processor.Greater.Should().BeFalse();
             // Add more assertions if needed
         }
 
@@ -47,7 +58,54 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             result.Should().BeFalse();
             // Add more assertions if needed
         }
+        [Fact]
+        public void Comparison_Should_Update_Register_Value()
+        {
+            // Arrange
+            const ushort valueRegisterOne = 10;
+            const ushort valueRegisterTwo = 5;
+            const string registerOne = "reg1";
+            const string registerTwo = "reg2";
+            Processor.registerDictionary[registerOne] = valueRegisterOne;
+            Processor.registerDictionary[registerTwo] = valueRegisterTwo;
 
-        // Add more test cases as needed
+            // Act
+            var result = _processorService.Compare(registerOne, registerTwo);
+
+            // Assert
+            result.Should().Be(true);
+            Processor.Equal.Should().BeFalse();
+            Processor.LessEqual.Should().BeFalse();
+            Processor.GreaterEqual.Should().BeTrue();
+
+            Processor.NotEqual.Should().BeTrue();
+            Processor.Less.Should().BeFalse();
+            Processor.Greater.Should().BeTrue();
+        }
+        //create a test where the first operand is a memory location and the second operand is a constant
+        [Fact]
+        public void Comparison_WithMemoryLocationAndConstant_ShouldReturnTrue()
+        {
+            // Arrange
+            const ushort indexMemory = 10;
+            const ushort valueOperandTwo = 25000;
+            MemoryActions.WriteValueToMemory(indexMemory, valueOperandTwo);
+
+            const string memoryLocation = "mem[10]";
+            const string constantValue = "25000";
+
+            // Act
+            var result = _processorService.Compare(memoryLocation, constantValue);
+
+            // Assert
+            result.Should().BeTrue();
+            Processor.Equal.Should().BeTrue();
+            Processor.LessEqual.Should().BeTrue();
+            Processor.GreaterEqual.Should().BeTrue();
+
+            Processor.NotEqual.Should().BeFalse();
+            Processor.Less.Should().BeFalse();
+            Processor.Greater.Should().BeFalse();
+        }
     }
 }

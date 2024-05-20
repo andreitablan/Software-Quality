@@ -22,7 +22,7 @@ namespace ProjectSQ.Services
             bool isInputFileGood = true;
             while (Memory.currentInstruction < Memory.instructionsNumber && isInputFileGood)
             {
-                string instruction = Memory.internalMemory[Memory.currentInstruction++];
+                string instruction = Memory.internalMemory[Memory.currentInstruction];
                 string[] words = instruction.Split(' ');
                 string operation = words[0];
                 switch (operation)
@@ -66,18 +66,18 @@ namespace ProjectSQ.Services
                         break;
                     case "shr":
                         operands = words[1].Split(",");
-                        isInputFileGood = ShiftLeft(operands[0], operands[1]);
+                        isInputFileGood = ShiftRight(operands[0], operands[1]);
                         break;
                     case "shl":
                         operands = words[1].Split(",");
-                        isInputFileGood = ShiftRight(operands[0], operands[1]);
+                        isInputFileGood = ShiftLeft(operands[0], operands[1]);
                         break;
                     case "cmp":
                         operands = words[1].Split(",");
                         Compare(operands[0], operands[1]);
                         break;
                     case "jmp":
-                        Jump(words[1]);
+                        isInputFileGood = Jump(words[1]);
                         break;
                     case "je":
                         JumpIfEqual(words[1]);
@@ -117,6 +117,7 @@ namespace ProjectSQ.Services
                         Read(words[1]);
                         break;
                 }
+                Memory.currentInstruction++;
             }
             var executionResult = new ExecutionResult();
             executionResult.Registers = LoadResultRegisters();
@@ -450,11 +451,10 @@ namespace ProjectSQ.Services
         }
         public bool Jump(string label)
         {
-            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
+            for (ushort index = 0; index < Memory.instructionsNumber; index++)
+                if (Memory.internalMemory[index].Split(' ')[0] == "label" && Memory.internalMemory[index].Split(' ')[1] == label)
                 {
                     Memory.currentInstruction = index;
-                    break;
                     return true;
                 }
             return false;
@@ -540,8 +540,8 @@ namespace ProjectSQ.Services
         {
             WriteValueToMemory(Processor.StackPointer, Memory.currentInstruction);
             Processor.StackPointer += 2;
-            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
-                if (Memory.internalMemory[index].Split(' ')[1] == functionName && Memory.internalMemory[index].Split(' ')[0] == "function")
+            for (ushort index = 0; index < Memory.instructionsNumber; index++)
+                if (Memory.internalMemory[index].Split(' ')[0] == "function" && Memory.internalMemory[index].Split(' ')[1] == functionName)
                 {
                     Memory.currentInstruction = index;
                     break;
@@ -554,8 +554,6 @@ namespace ProjectSQ.Services
             Memory.currentInstruction = ReadValueFromMemory(Processor.StackPointer);
             Memory.programData[Processor.StackPointer] = 0;
             Memory.programData[Processor.StackPointer + 1] = 0;
-            if (Memory.currentInstruction < Memory.instructionsNumber)
-                Memory.currentInstruction++;
         }
         public void Read(string operand)
         {
@@ -708,8 +706,8 @@ namespace ProjectSQ.Services
                 Processor.GreaterEqual = true;
 
                 Processor.NotEqual = false;
-                Processor.Less = operandValueOne <= operandValueTwo;
-                Processor.Greater = operandValueOne >= operandValueTwo;
+                Processor.Less = operandValueOne < operandValueTwo;
+                Processor.Greater = operandValueOne > operandValueTwo;
 
                 return;
             }
@@ -734,8 +732,6 @@ namespace ProjectSQ.Services
                 Processor.NotEqual = true;
                 Processor.Less = false;
                 Processor.Greater = true;
-
-                return;
             }
         }
 

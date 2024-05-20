@@ -88,5 +88,21 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().Be(false);
         }
+        //create a test with assignment with an invalid memory instruction
+        [Fact]
+        public void Assignment_Should_Return_False_For_Invalid_Memory_Instruction()
+        {
+            // Arrange
+            var operandOne = "reg9";
+            var operandTwo = "789";
+            Processor.InitProcessor();
+            Memory.InitMemory();
+
+            // Act
+            var result = sut.Assignment(operandOne, operandTwo);
+
+            // Assert
+            result.Should().Be(false);
+        }
     }
 }

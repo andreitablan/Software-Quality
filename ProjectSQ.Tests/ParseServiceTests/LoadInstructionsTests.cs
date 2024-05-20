@@ -9,7 +9,7 @@ using ProjectSQ.Models;
 
 namespace ProjectSQ.Tests.ParseServiceTests
 {
-    public class LoadInstructionsTests
+    public class LoadInstructionsTests 
     {
         private readonly ParseService _parseService;
 
