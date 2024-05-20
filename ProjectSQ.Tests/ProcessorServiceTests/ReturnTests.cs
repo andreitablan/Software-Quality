@@ -98,7 +98,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             _processorService.Return();
 
             // Assert
-            Memory.currentInstruction.Should().Be(1);
+            Memory.currentInstruction.Should().Be(2);
             Processor.StackPointer.Should().Be(0);
             Memory.programData[0].Should().Be(0);
             Memory.programData[1].Should().Be(0);

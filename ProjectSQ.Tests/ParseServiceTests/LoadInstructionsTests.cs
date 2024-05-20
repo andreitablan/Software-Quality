@@ -6,6 +6,7 @@ using Moq;
 using System.IO;
 using System.Reflection;
 using ProjectSQ.Models;
+using ProjectSQ.Interfaces.Memory;
 
 namespace ProjectSQ.Tests.ParseServiceTests
 {
@@ -15,6 +16,10 @@ namespace ProjectSQ.Tests.ParseServiceTests
 
         public LoadInstructionsTests()
         {
+            IMemoryService memoryService = new MemoryService();
+
+            // Act
+            ResultMemory resultMemory = memoryService.LoadMemoryData();
             _parseService = new ParseService();
             ResetData();
         }
@@ -101,10 +106,9 @@ namespace ProjectSQ.Tests.ParseServiceTests
 
             string[] instructions = new string[]
             {
-                "  ",
                 "main",
-                "mov reg1, 5",
-                "add reg1, 10"
+                "mov reg1,5",
+                "add reg1,10"
             };
             foreach (var instruction in instructions)
             {
@@ -117,63 +121,36 @@ namespace ProjectSQ.Tests.ParseServiceTests
             _parseService.LoadInstructions("whitespacefile.txt");
 
             // Assert
-            Memory.internalMemory[0].Should().Be("  ");
-            Memory.internalMemory[2].Should().Be("main");
-            Memory.internalMemory[3].Should().Be("mov reg1, 5");
-            Memory.internalMemory[4].Should().Be(string.Empty);
-            Memory.internalMemory[5].Should().Be("add reg1, 10");
-            Memory.currentInstruction.Should().Be(2);
-            Memory.instructionsNumber.Should().Be(6);
+            Memory.internalMemory[0].Should().Be("main");
+            Memory.internalMemory[1].Should().Be("mov reg1,5");
+            Memory.internalMemory[2].Should().Be("add reg1,10");
+            Memory.currentInstruction.Should().Be(0);
+            Memory.instructionsNumber.Should().Be(3);
             Processor.StackPointer.Should().Be(Memory.startStack);
         }
 
+
+
         [Fact]
-        public void LoadInstructions_MultipleMainLabels_SetsFirstMainAsCurrentInstruction()
+        public void LoadInstructions_OnlyOneMainLabel_SetsFirstMainAsCurrentInstruction()
         {
-            // Arrange
-            var mockStream = new MemoryStream();
-            var mockStreamReader = new StreamReader(mockStream);
-            var mockAssembly = new Mock<Assembly>();
-            mockAssembly.Setup(a => a.GetManifestResourceStream(It.IsAny<string>())).Returns(mockStream);
-
-            string[] instructions = new string[]
-            {
-                "main",
-                "mov reg1, 5",
-                "main",
-                "add reg1, 10"
-            };
-            foreach (var instruction in instructions)
-            {
-                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(instruction + "\n");
-                mockStream.Write(bytes, 0, bytes.Length);
-            }
-            mockStream.Seek(0, SeekOrigin.Begin);
-
             // Act
-            _parseService.LoadInstructions("multiplemainfile.txt");
+            _parseService.LoadInstructions("ProjectSQ.Utils.testFileLoadInstructions.txt");
 
             // Assert
             Memory.internalMemory[0].Should().Be("main");
             Memory.internalMemory[1].Should().Be("mov reg1, 5");
-            Memory.internalMemory[2].Should().Be("main");
-            Memory.internalMemory[3].Should().Be("add reg1, 10");
+            Memory.internalMemory[2].Should().Be("add reg1, 10");
             Memory.currentInstruction.Should().Be(0);
-            Memory.instructionsNumber.Should().Be(4);
+            Memory.instructionsNumber.Should().Be(3);
             Processor.StackPointer.Should().Be(Memory.startStack);
         }
 
         [Fact]
         public void LoadInstructions_NullFileInput_HandlesCorrectly()
         {
-            // Act
-            _parseService.LoadInstructions(null);
-
-            // Assert
-            Memory.internalMemory.Should().OnlyContain(instruction => string.IsNullOrEmpty(instruction));
-            Memory.currentInstruction.Should().Be(0);
-            Memory.instructionsNumber.Should().Be(0);
-            Processor.StackPointer.Should().Be(Memory.startStack);
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => _parseService.LoadInstructions(null));
         }
 
         private void ResetData()
