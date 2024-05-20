@@ -100,5 +100,37 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             Processor.registerDictionary[register].Should().Be(0);
             _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
         }
+
+        [Fact]
+        public void Read_NoSpaceAfterDigits_StoresCorrectlyInRegister()
+        {
+            // Arrange
+            const string register = "reg1";
+            Memory.programData = new byte[] { (byte)'4', (byte)'5', 0, 0, 0 };
+            Memory.currentIndexMemoryVideo = 0;
+
+            // Act
+            _processorService.Read(register);
+
+            // Assert
+            Processor.registerDictionary[register].Should().Be(45);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+        }
+
+        [Fact]
+        public void Read_StopsAtFirstSpace()
+        {
+            // Arrange
+            const string register = "reg1";
+            Memory.programData = new byte[] { (byte)'1', (byte)'2', (byte)' ', (byte)'3', (byte)'4', (byte)' ', 0 };
+            Memory.currentIndexMemoryVideo = 0;
+
+            // Act
+            _processorService.Read(register);
+
+            // Assert
+            Processor.registerDictionary[register].Should().Be(12);
+            _mockHubContext.Verify(hub => hub.Clients.All.SendAsync("ReadOperation", It.IsAny<object>(), default), Times.Once);
+        }
     }
 }
