@@ -17,6 +17,8 @@ namespace ProjectSQ.Models
         public static ushort lastIndexOfMemoryVideo = 50001;
         public static ushort maxIndexOfMemoryVideo = 60000;
 
+        public static bool StopWriteToVideoMemory { get; set; } = false;
+
 
         public static void InitMemory()
         {

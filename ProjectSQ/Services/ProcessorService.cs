@@ -464,10 +464,10 @@ namespace ProjectSQ.Services
         {
             if (Processor.Equal)
             {
-                var res = Jump(label);
-                return res;
+                bool res = Jump(label);
+                return true;
             }
-            return true;
+            return false;
         }
 
         public bool JumpIfNotEqual(string label)
@@ -475,9 +475,9 @@ namespace ProjectSQ.Services
             if (Processor.NotEqual)
             {
                 bool res = Jump(label);
-                return res;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public bool JumpIfLessThan(string label)
@@ -485,9 +485,9 @@ namespace ProjectSQ.Services
             if (Processor.Less)
             {
                 bool res = Jump(label);
-                return res;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public bool JumpIfGreaterThan(string label)
@@ -495,9 +495,9 @@ namespace ProjectSQ.Services
             if (Processor.Greater)
             {
                 bool res = Jump(label);
-                return res;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public bool JumpIfLessThanOrEqual(string label)
@@ -505,9 +505,9 @@ namespace ProjectSQ.Services
             if (Processor.LessEqual)
             {
                 bool res = Jump(label);
-                return res;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public bool JumpIfGreaterThanOrEqual(string label)
@@ -515,9 +515,9 @@ namespace ProjectSQ.Services
             if (Processor.GreaterEqual)
             {
                 bool res = Jump(label);
-                return res;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public void Pop(string operand)
@@ -600,7 +600,7 @@ namespace ProjectSQ.Services
 
         public static void WriteToVideoMemory()
         {
-            while (true)
+            while (Memory.StopWriteToVideoMemory)
             {
                 if (Memory.isKeyboardBufferChanged)
                 {
