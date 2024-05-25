@@ -25,7 +25,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
-            const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
+            Memory.instructionsNumber = 2;
+            const ushort expectedInstructionIndex = 0; // Index of "mov" instruction
 
             // Act
             var result = _processorService.Jump(label);
@@ -33,6 +34,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -41,6 +43,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "invalid_label";
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -49,6 +52,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -58,7 +62,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.Equal = true;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
-            const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
+            Memory.instructionsNumber = 2;
+            const ushort expectedInstructionIndex = 0; // Index of "mov" instruction
 
             // Act
             var result = _processorService.JumpIfEqual(label);
@@ -75,6 +80,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.Equal = false;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -92,7 +98,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.NotEqual = true;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
-            const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
+            Memory.instructionsNumber = 2;
+            const ushort expectedInstructionIndex = 0; // Index of "mov" instruction
 
             // Act
             var result = _processorService.JumpIfNotEqual(label);
@@ -109,6 +116,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.NotEqual = false;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -125,7 +133,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.Less = true;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
 
             // Act
@@ -142,7 +151,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.Less = false;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -159,7 +169,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.Greater = true;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
 
             // Act
@@ -176,7 +187,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.Greater = false;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -193,7 +205,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.LessEqual = true;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
 
             // Act
@@ -210,7 +223,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Arrange
             const string label = "target";
             Processor.LessEqual = false;
-            Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.internalMemory = new[] { "label target1", "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
@@ -228,7 +242,8 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.GreaterEqual = true;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
-            const ushort expectedInstructionIndex = 1; // Index of "mov" instruction
+            Memory.instructionsNumber = 2;
+            const ushort expectedInstructionIndex = 0; // Index of "mov" instruction
 
             // Act
             var result = _processorService.JumpIfGreaterThanOrEqual(label);
@@ -245,6 +260,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             const string label = "target";
             Processor.GreaterEqual = false;
             Memory.internalMemory = new[] { "label target", "mov reg1, 5" }; // Simulate some instructions
+            Memory.instructionsNumber = 2;
             const ushort expectedInstructionIndex = 0; // Current instruction index should remain unchanged
 
             // Act
