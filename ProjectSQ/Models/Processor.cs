@@ -19,7 +19,7 @@
             {"reg1" , 0 }, {"reg2" , 0 }, {"reg3" , 0 },{"reg4" , 0 }, {"reg5" , 0 }, {"reg6" , 0 }, {"reg7" , 0 }, {"reg8" , 0 }
         };
 
-            StackPointer = 0;
+            StackPointer = 60000;
             Greater = false;
             Less = false;
             NotEqual = false;

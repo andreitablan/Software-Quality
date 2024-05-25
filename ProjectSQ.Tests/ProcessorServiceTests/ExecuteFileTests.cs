@@ -185,7 +185,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             //Act
             sut.ExecuteFile();
             //Assert
-            Processor.StackPointer.Should().Be(2);
+            Processor.StackPointer.Should().Be(60002);
             byte lowByte = Memory.programData[Processor.StackPointer - 2];
             byte highByte = Memory.programData[Processor.StackPointer - 1];
             ushort result = (ushort)((highByte << 8) | lowByte);
@@ -206,7 +206,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             sut.ExecuteFile();
             //Assert
             Processor.registerDictionary["reg2"].Should().Be(54033);
-            Processor.StackPointer.Should().Be(0);
+            Processor.StackPointer.Should().Be(60000);
             Memory.programData[Processor.StackPointer].Should().Be(0);
             Memory.programData[Processor.StackPointer + 1].Should().Be(0);
         }

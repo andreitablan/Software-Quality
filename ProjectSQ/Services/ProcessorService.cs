@@ -2,7 +2,10 @@
 using ProjectSQ.Interfaces.Memory;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
+using ProjectSQ.Models.Assertions;
+using System;
 
 namespace ProjectSQ.Services
 {
@@ -19,9 +22,44 @@ namespace ProjectSQ.Services
 
         public void ExecuteFile()
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            CustomAssert.IsTrue(Processor.StackPointer == Memory.startStack, "Precondition failed: Processor.StackPointer must be equal to Memory.startStack");
+            CustomAssert.IsTrue(Processor.Greater == false, "Precondition failed: Greater flag is not set on false");
+            CustomAssert.IsTrue(Processor.Less == false, "Precondition failed: Greater flag is not set on false");
+            CustomAssert.IsTrue(Processor.NotEqual == false, "Precondition failed: Greater flag is not set on false");
+            CustomAssert.IsTrue(Processor.LessEqual == false, "Precondition failed: Greater flag is not set on false");
+            CustomAssert.IsTrue(Processor.GreaterEqual == false, "Precondition failed: Greater flag is not set on false");
+            CustomAssert.IsTrue(Processor.Equal == false, "Precondition failed: Greater flag is not set on false");
+
+            //memory
+            CustomAssert.IsTrue(Memory.internalMemory != null, "Precondition failed: Memory.internalMemory is not initialized");
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+            CustomAssert.IsTrue(Memory.instructionsNumber > 0, "Precondition failed: Memory.instructionsNumber must be greater than zero");
+            CustomAssert.IsTrue(Memory.currentInstruction >= 0 && Memory.currentInstruction < Memory.instructionsNumber, "Precondition failed: Memory.currentInstruction is out of bounds");
+            
+           
             bool isInputFileGood = true;
             while (Memory.currentInstruction < Memory.instructionsNumber && isInputFileGood)
             {
+                //invariants
+                CustomAssert.IsTrue(Processor.StackPointer >= Memory.startStack,
+                    "Invariant failed: Processor.StackPointer must be greater than or equal to Memory.startStack");
+                CustomAssert.IsTrue(Processor.StackPointer < Memory.endStack,
+                    "Invariant failed: Processor.StackPointer must be lower than Memory.endStack");
+                CustomAssert.IsTrue(
+                    Memory.currentInstruction >= 0 && Memory.currentInstruction < Memory.instructionsNumber,
+                    "Invariant failed: Memory.currentInstruction is out of bounds");
+
                 string instruction = Memory.internalMemory[Memory.currentInstruction];
                 string[] words = instruction.Split(' ');
                 string operation = words[0];
@@ -123,20 +161,43 @@ namespace ProjectSQ.Services
             executionResult.Registers = LoadResultRegisters();
             executionResult.Memory = memoryService.LoadMemoryData();
             this.hubContext.Clients.All.SendAsync("ReceiveExecutionResult", executionResult);
+
+            //postconditions
+            CustomAssert.IsTrue(Memory.currentInstruction <= Memory.instructionsNumber + 1, "Postcondition failed: Execution did not complete successfully");
+            CustomAssert.IsTrue(Processor.StackPointer >= Memory.startStack, "Postcondition failed: Processor.StackPointer must be greater than or equal to Memory.startStack");
+            CustomAssert.IsTrue(Processor.StackPointer < Memory.endStack, "Postcondition failed: Processor.StackPointer must be lower than to Memory.startStack");
+
         }
 
         public bool Assignment(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
                 Processor.registerDictionary[operandOne] = value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == value, "Postcondition failed: The register was not set");
                 return true;
             }
             //operandOne is a constant value -> error (mov 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -146,27 +207,51 @@ namespace ProjectSQ.Services
 
                 if (indexOperandOne >= Memory.keyboardBufferIndex)
                 {
+                    CustomAssert.IsTrue(true, "No post condition here");
                     return false;
                 }
 
                 ushort valueOperandTwo = GetValue(operandTwo);
                 WriteValueToMemory(indexOperandOne, valueOperandTwo);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == valueOperandTwo, "Postcondition failed: The memory location was not set");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Addition(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] += value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] - value == oldValue, "Postcondition failed: The register was not added");
                 return true;
             }
             //operandOne is a constant value -> error (add 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -178,22 +263,44 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne + valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not added");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Subtraction(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] -= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue - value, "Postcondition failed: The register was not subtracted");
                 return true;
             }
             //operandOne is a constant value -> error (sub 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -206,22 +313,45 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne - valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+                
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not subtracted");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Multiplication(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] *= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue*value, "Postcondition failed: The register was not multiplied");
                 return true;
             }
             //operandOne is a constant value -> error (mul 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -233,22 +363,44 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne * valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+                
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not multiplied");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Division(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] /= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue/value, "Postcondition failed: The register was not divided");
                 return true;
             }
             //operandOne is a constant value -> error (div 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -260,44 +412,89 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne / valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+                
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not divided");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Not(string operandOne)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] = (ushort)~Processor.registerDictionary[operandOne];
+
+                CustomAssert.IsTrue(oldValue == (ushort)~Processor.registerDictionary[operandOne], "Postcondition failed: The register was not negated");
                 return true;
             }
             //constant value -> you can not do that
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             if (operandOne.Contains("mem["))
             {
                 ushort index = GetMemoryIndex(operandOne);
+                byte oldValue = Memory.programData[index];
                 Memory.programData[index] = (byte)~Memory.programData[index];
                 Memory.programData[index + 1] = (byte)~Memory.programData[index + 1];
+
+                CustomAssert.IsTrue(oldValue == (byte)~Memory.programData[index], "Postcondition failed: The memory location was not negated");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool And(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] &= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == (ushort)(oldValue & value), "Postcondition failed: The register was not anded");
                 return true;
             }
             //operandOne is a constant value -> error (and 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -309,22 +506,42 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne & valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not anded");
                 return true;
             }
             return false;
         }
         public bool Or(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] |= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == (ushort)(oldValue | value), "Postcondition failed: The register was not ored");
                 return true;
             }
             //operandOne is a constant value -> error (or 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -336,22 +553,44 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne | valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not ored");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Xor(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] ^= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == (ushort)(oldValue ^ value), "Postcondition failed: The register was not xored");
                 return true;
             }
             //operandOne is a constant value -> error (xor 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -363,22 +602,42 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne ^ valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not xored");
                 return true;
             }
             return false;
         }
         public bool ShiftLeft(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] <<= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == (ushort)(oldValue << value), "Postcondition failed: The register was not shifted left");
                 return true;
             }
             //operandOne is a constant value -> error (shl 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -390,22 +649,44 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne << valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not shifted left");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool ShiftRight(string operandOne, string operandTwo)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
                 ushort value = GetValue(operandTwo);
+                ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] >>= value;
+
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == (ushort)(oldValue >> value), "Postcondition failed: The register was not shifted right");
                 return true;
             }
             //operandOne is a constant value -> error (shr 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
+                CustomAssert.IsTrue(true, "No post condition here");
                 return false;
             }
             //operandOne is a memory location
@@ -417,8 +698,12 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne >> valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
+
+                CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not shifted right");
                 return true;
             }
+
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Compare(string operandOne, string operandTwo)
@@ -465,7 +750,7 @@ namespace ProjectSQ.Services
             if (Processor.Equal)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -475,7 +760,7 @@ namespace ProjectSQ.Services
             if (Processor.NotEqual)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -485,7 +770,7 @@ namespace ProjectSQ.Services
             if (Processor.Less)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -495,7 +780,7 @@ namespace ProjectSQ.Services
             if (Processor.Greater)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -505,7 +790,7 @@ namespace ProjectSQ.Services
             if (Processor.LessEqual)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -515,7 +800,7 @@ namespace ProjectSQ.Services
             if (Processor.GreaterEqual)
             {
                 bool res = Jump(label);
-                return true;
+                return res;
             }
             return false;
         }
@@ -637,43 +922,87 @@ namespace ProjectSQ.Services
 
         private static void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
         {
+            //preconditions
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             byte highByte = (byte)(valueOperandTwo >> 8);
             byte lowByte = (byte)(valueOperandTwo & 0xFF);
 
             // write to two consecutive addresses
             Memory.programData[indexOperandOne] = lowByte;
             Memory.programData[indexOperandOne + 1] = highByte;
+
+            //postconditions
+            CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == valueOperandTwo, "Postcondition failed: The memory location was not set");
         }
         private static ushort ReadValueFromMemory(int index)
         {
+            //preconditions
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             byte lowByte = Memory.programData[index];
             byte highByte = Memory.programData[index + 1];
             ushort result = (ushort)((highByte << 8) | lowByte);
+            
+            //postconditions
+            CustomAssert.IsTrue(result == (ushort)((Memory.programData[index + 1] << 8) | Memory.programData[index]), "Postcondition failed: The memory location was not read");
             return result;
         }
 
 
         private static ushort GetValue(string operand)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             //second operand is a data register
             if (Processor.registerDictionary.TryGetValue(operand, out ushort value))
             {
+                CustomAssert.IsTrue(value >= 0 && value <= ushort.MaxValue, "Postcondition failed: The value is not in the correct range");
                 return value;
             }
             //second operand is a constant value
             if (DigitsOnlyRegex().IsMatch(operand))
             {
+                CustomAssert.IsTrue(value >= 0 && value <= ushort.MaxValue, "Postcondition failed: The value is not in the correct range");
                 return ushort.Parse(operand);
             }
 
             //second operand is a memory location -> need to read two consecutive addresses
             int index = GetMemoryIndex(operand);
             ushort result = ReadValueFromMemory(index);
+            CustomAssert.IsTrue(value >= 0 && value <= ushort.MaxValue, "Postcondition failed: The value is not in the correct range");
             return result;
         }
 
         private static ushort GetMemoryIndex(string operand)
         {
+            //preconditions
+            //processor
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                if (!Processor.registerDictionary.ContainsKey(registerName))
+                {
+                    CustomAssert.IsTrue(false, $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+                }
+            }
+            //memory
+            CustomAssert.IsTrue(operand.Contains("mem["), "Precondition failed: The operand is not a memory location");
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             int startIndex = operand.IndexOf('[') + 1;
             int endIndex = operand.IndexOf(']');
             string indexStr = operand[startIndex..endIndex];
@@ -681,11 +1010,14 @@ namespace ProjectSQ.Services
             //address specified by a constant value
             if (ushort.TryParse(indexStr, out ushort index))
             {
+                CustomAssert.IsTrue(index >= 0 && index < Memory.programData.Length, "Postcondition failed: The index is not in the correct range");
                 return index;
             }
 
             //address specified by a data register
             Processor.registerDictionary.TryGetValue(indexStr, out index);
+
+            CustomAssert.IsTrue(index >= 0 && index < Memory.programData.Length, "Postcondition failed: The index is not in the correct range");
             return index;
         }
 
