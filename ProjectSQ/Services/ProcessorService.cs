@@ -834,12 +834,19 @@ namespace ProjectSQ.Services
 
             bool functionFound = false;
             for (ushort index = 0; index < Memory.instructionsNumber; index++)
-                if (Memory.internalMemory[index].Split(' ')[0] == "function" && Memory.internalMemory[index].Split(' ')[1] == functionName)
+            {
+                // Loop invariant: Ensure index is within bounds
+                CustomAssert.IsTrue(index >= 0 && index < Memory.instructionsNumber, "Invariant failed: Index is out of bounds");
+
+                if (Memory.internalMemory[index].Split(' ')[0] == "function" &&
+                    Memory.internalMemory[index].Split(' ')[1] == functionName)
                 {
                     Memory.currentInstruction = index;
                     functionFound = true;
                     break;
                 }
+            }
+
             CustomAssert.IsTrue(functionFound, $"Precondition failed: Function {functionName} not found");
 
             // Postcondition: Validate Processor and Memory states after Call operation
@@ -881,11 +888,14 @@ namespace ProjectSQ.Services
             ushort result = 0;
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
             {
+                // Loop invariant: Ensure the current index is within bounds
+                CustomAssert.IsTrue(Memory.currentIndexMemoryVideo < Memory.programData.Length, "Invariant failed: Memory.currentIndexMemoryVideo is out of bounds during reading digits");
                 result = (ushort)(result * 10 + ((char)(Memory.programData[Memory.currentIndexMemoryVideo]) - '0'));
                 Memory.currentIndexMemoryVideo++;
             }
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] == ' ')
             {
+                CustomAssert.IsTrue(Memory.currentIndexMemoryVideo < Memory.programData.Length, "Invariant failed: Memory.currentIndexMemoryVideo is out of bounds during reading spaces");
                 Memory.currentIndexMemoryVideo++;
             }
             // Postcondition: Validate the result of the Read operation

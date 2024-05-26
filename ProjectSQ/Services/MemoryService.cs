@@ -21,6 +21,7 @@ namespace ProjectSQ.Services
             for (int i = 0; i < Memory.programData.Length; i++)
             {
                 CustomAssert.IsTrue(resultMemory.Data.ElementAt(i) == Memory.programData[i], $"Postcondition failed: resultMemory.Data[{i}] does not match Memory.programData[{i}]");
+                CustomAssert.IsTrue(i < Memory.programData.Length, $"Invariant failed: Index {i} is out of bounds.");
             }
 
             return resultMemory;

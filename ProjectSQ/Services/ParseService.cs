@@ -38,6 +38,9 @@ namespace ProjectSQ.Services
                         if (line.Contains("main"))
                             Memory.currentInstruction = index;
                         index++;
+
+                        // Loop invariant: After each iteration, the index is incremented correctly
+                        CustomAssert.IsTrue(index > 0, "Invariant failed: Index was not incremented.");
                     }
                     Memory.instructionsNumber = index;
                     Processor.StackPointer = Memory.startStack;
