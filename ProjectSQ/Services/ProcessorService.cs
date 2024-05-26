@@ -3,6 +3,12 @@ using ProjectSQ.Interfaces.Memory;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
 using System.Text.RegularExpressions;
+<<<<<<< Updated upstream
+=======
+using ProjectSQ.Models.Assertions;
+using System;
+using System.Reflection;
+>>>>>>> Stashed changes
 
 namespace ProjectSQ.Services
 {
@@ -422,6 +428,9 @@ namespace ProjectSQ.Services
         }
         public bool Compare(string operandOne, string operandTwo)
         {
+            CustomAssert.IsTrue(operandOne != null, "Precondition failed: operandOne is null");
+            CustomAssert.IsTrue(operandTwo != null, "Precondition failed: operandTwo is null");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
@@ -446,12 +455,20 @@ namespace ProjectSQ.Services
                 SetCompareFlags(valueOperandOne, valueOperandTwo);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Jump(string label)
         {
+<<<<<<< Updated upstream
             for (ushort index = 0; index < Memory.internalMemory.Length; index++)
                 if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
+=======
+            CustomAssert.IsTrue(Memory.internalMemory != null, "Precondition failed: Memory.internalMemory is not initialized");
+            CustomAssert.IsTrue(Memory.instructionsNumber != null, "Precondition failed: Memory.instructionsNumber is not initialized");
+            for (ushort index = 0; index < Memory.instructionsNumber; index++)
+                if (Memory.internalMemory[index].Split(' ')[0] == "label" && Memory.internalMemory[index].Split(' ')[1] == label)
+>>>>>>> Stashed changes
                 {
                     Memory.currentInstruction = index;
                     break;
@@ -462,61 +479,73 @@ namespace ProjectSQ.Services
 
         public bool JumpIfEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.Equal != null, "Precondition failed: Processor.Equal is not initialized");
             if (Processor.Equal)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfNotEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.NotEqual != null, "Precondition failed: Processor.NotEqual is not initialized");
             if (Processor.NotEqual)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfLessThan(string label)
         {
+            CustomAssert.IsTrue(Processor.Less != null, "Precondition failed: Processor.Less is not initialized");
             if (Processor.Less)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfGreaterThan(string label)
         {
+            CustomAssert.IsTrue(Processor.Greater != null, "Precondition failed: Processor.Greater is not initialized");
             if (Processor.Greater)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfLessThanOrEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.LessEqual != null, "Precondition failed: Processor.LessEqual is not initialized");
             if (Processor.LessEqual)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfGreaterThanOrEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.GreaterEqual != null, "Precondition failed: Processor.GreaterEqual is not initialized");
             if (Processor.GreaterEqual)
             {
                 bool res = Jump(label);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
@@ -708,8 +737,15 @@ namespace ProjectSQ.Services
                 Processor.GreaterEqual = true;
 
                 Processor.NotEqual = false;
+<<<<<<< Updated upstream
                 Processor.Less = operandValueOne <= operandValueTwo;
                 Processor.Greater = operandValueOne >= operandValueTwo;
+=======
+                Processor.Less = operandValueOne < operandValueTwo;
+                Processor.Greater = operandValueOne > operandValueTwo;
+                CustomAssert.IsTrue(Processor.Equal & Processor.LessEqual & Processor.GreaterEqual == true &&
+                                    !Processor.NotEqual & !Processor.Less & !Processor.Greater == true, "Postcondition failed: Flag error");
+>>>>>>> Stashed changes
 
                 return;
             }
@@ -723,6 +759,9 @@ namespace ProjectSQ.Services
                 Processor.Less = true;
                 Processor.Greater = false;
 
+                CustomAssert.IsTrue(Processor.LessEqual & Processor.NotEqual & Processor.Less == true &&
+                                    !Processor.Equal & !Processor.GreaterEqual & !Processor.Greater == true, "Postcondition failed: Flag error");
+
                 return;
             }
             if (operandValueOne > operandValueTwo)
@@ -735,8 +774,15 @@ namespace ProjectSQ.Services
                 Processor.Less = false;
                 Processor.Greater = true;
 
+<<<<<<< Updated upstream
                 return;
+=======
+                CustomAssert.IsTrue(Processor.GreaterEqual & Processor.NotEqual & Processor.Greater == true &&
+                                    !Processor.Equal & !Processor.LessEqual & !Processor.Less == true, "Postcondition failed: Flag error");
+
+>>>>>>> Stashed changes
             }
+            CustomAssert.IsTrue(true, "No post condition here");
         }
 
         [GeneratedRegex(@"^\d+$")]
