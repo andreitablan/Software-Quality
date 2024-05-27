@@ -2,10 +2,8 @@
 using ProjectSQ.Interfaces.Memory;
 using ProjectSQ.Interfaces.Processor;
 using ProjectSQ.Models;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using ProjectSQ.Models.Assertions;
-using System;
+using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace ProjectSQ.Services
@@ -198,7 +196,7 @@ namespace ProjectSQ.Services
             //operandOne is a constant value -> error (mov 2, orice)
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
-                CustomAssert.IsTrue(true, "No post condition here");
+                CustomAssert.IsTrue(true, "No postcondition here");
                 return false;
             }
             //operandOne is a memory location
@@ -208,7 +206,7 @@ namespace ProjectSQ.Services
 
                 if (indexOperandOne >= Memory.keyboardBufferIndex)
                 {
-                    CustomAssert.IsTrue(true, "No post condition here");
+                    CustomAssert.IsTrue(true, "No postcondition here");
                     return false;
                 }
 
@@ -449,7 +447,7 @@ namespace ProjectSQ.Services
             //constant value -> you can not do that
             if (DigitsOnlyRegex().IsMatch(operandOne))
             {
-                CustomAssert.IsTrue(true, "No post condition here");
+                CustomAssert.IsTrue(true, "No postcondition here");
                 return false;
             }
             if (operandOne.Contains("mem["))
@@ -963,17 +961,28 @@ namespace ProjectSQ.Services
 
         public void WriteValueToKeyboardBuffer(ushort value)
         {
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             byte lowByte = (byte)(value & 0xFF);
             Memory.programData[Memory.keyboardBufferIndex] = lowByte;
             Memory.isKeyboardBufferChanged = true;
+
+            CustomAssert.IsTrue(Memory.programData[Memory.keyboardBufferIndex] == lowByte, "Postcondition failed: The keyboard buffer was not changed");
+            CustomAssert.IsTrue(Memory.isKeyboardBufferChanged, "Postcondition failed: The keyboard buffer flag was not changed");
         }
 
         public static void WriteToVideoMemory()
         {
+            CustomAssert.IsTrue(Memory.programData[Memory.lastIndexOfMemoryVideo] == (byte)0, "PreCondition failed: The memory location is already populated");
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             while (Memory.StopWriteToVideoMemory)
             {
+
                 if (Memory.isKeyboardBufferChanged)
                 {
+                    CustomAssert.IsTrue(Memory.lastIndexOfMemoryVideo > Memory.maxIndexOfMemoryVideo,
+                        "Invariant failed: Memory.lastIndexOfMemoryVideo must be less then Memory.maxIndexOfMemoryVideo");
                     Memory.programData[Memory.lastIndexOfMemoryVideo] = Memory.programData[Memory.keyboardBufferIndex];
 
                     if (Memory.lastIndexOfMemoryVideo < Memory.maxIndexOfMemoryVideo)
@@ -981,28 +990,43 @@ namespace ProjectSQ.Services
                         Memory.lastIndexOfMemoryVideo++;
                     }
 
+                    CustomAssert.IsTrue(Memory.programData[Memory.lastIndexOfMemoryVideo - 1] == Memory.programData[Memory.keyboardBufferIndex],
+                        $"Invariant failed: {Memory.programData[Memory.keyboardBufferIndex]} was not assigned in the video memory");
+
                     Memory.isKeyboardBufferChanged = false;
                 }
             }
+
+            CustomAssert.IsTrue(true, "No postcondition here");
         }
 
         public string ReadFromVideoMemory()
         {
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             var result = "";
 
             for (int i = Memory.firstVideoMemoryIndex; i < Memory.lastIndexOfMemoryVideo; i++)
             {
+                CustomAssert.IsTrue(Memory.programData[i] != null, $"Invariant failed: At index {i} Memory.programData is null");
+
                 result += ((char)Memory.programData[i]).ToString();
             }
 
+            CustomAssert.IsTrue(result != null, "Postcondition failed: The result of reading from video memory is null when it should at least be \"\"");
             return result;
         }
 
         public void RemoveFromVideoMemory()
         {
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+            CustomAssert.IsTrue(Memory.lastIndexOfMemoryVideo > Memory.firstVideoMemoryIndex, "Precondition failed: Memory.lastIndexOfMemoryVideo is smaller then Memory.firstVideoMemoryIndex");
+
             Memory.lastIndexOfMemoryVideo--;
 
             Memory.programData[Memory.lastIndexOfMemoryVideo] = 0;
+
+            CustomAssert.IsTrue(Memory.programData[Memory.lastIndexOfMemoryVideo] == 0, "Postcondition failed: not able to remove value from video memory");
         }
 
         private static void WriteValueToMemory(int indexOperandOne, ushort valueOperandTwo)
