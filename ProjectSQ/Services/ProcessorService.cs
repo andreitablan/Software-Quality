@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using ProjectSQ.Models.Assertions;
 using System;
+using System.Reflection;
 
 namespace ProjectSQ.Services
 {
@@ -46,8 +47,8 @@ namespace ProjectSQ.Services
             CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
             CustomAssert.IsTrue(Memory.instructionsNumber > 0, "Precondition failed: Memory.instructionsNumber must be greater than zero");
             CustomAssert.IsTrue(Memory.currentInstruction >= 0 && Memory.currentInstruction < Memory.instructionsNumber, "Precondition failed: Memory.currentInstruction is out of bounds");
-            
-           
+
+
             bool isInputFileGood = true;
             while (Memory.currentInstruction < Memory.instructionsNumber && isInputFileGood)
             {
@@ -313,7 +314,7 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne - valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
-                
+
                 CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not subtracted");
                 return true;
             }
@@ -345,7 +346,7 @@ namespace ProjectSQ.Services
                 ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] *= value;
 
-                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue*value, "Postcondition failed: The register was not multiplied");
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue * value, "Postcondition failed: The register was not multiplied");
                 return true;
             }
             //operandOne is a constant value -> error (mul 2, orice)
@@ -363,7 +364,7 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne * valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
-                
+
                 CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not multiplied");
                 return true;
             }
@@ -394,7 +395,7 @@ namespace ProjectSQ.Services
                 ushort oldValue = Processor.registerDictionary[operandOne];
                 Processor.registerDictionary[operandOne] /= value;
 
-                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue/value, "Postcondition failed: The register was not divided");
+                CustomAssert.IsTrue(Processor.registerDictionary[operandOne] == oldValue / value, "Postcondition failed: The register was not divided");
                 return true;
             }
             //operandOne is a constant value -> error (div 2, orice)
@@ -412,7 +413,7 @@ namespace ProjectSQ.Services
                 ushort result = (ushort)(valueOperandOne / valueOperandTwo);
 
                 WriteValueToMemory(indexOperandOne, result);
-                
+
                 CustomAssert.IsTrue(ReadValueFromMemory(indexOperandOne) == result, "Postcondition failed: The memory location was not divided");
                 return true;
             }
@@ -708,6 +709,9 @@ namespace ProjectSQ.Services
         }
         public bool Compare(string operandOne, string operandTwo)
         {
+            CustomAssert.IsTrue(operandOne != null, "Precondition failed: operandOne is null");
+            CustomAssert.IsTrue(operandTwo != null, "Precondition failed: operandTwo is null");
+
             //first operand is data register
             if (Processor.registerDictionary.ContainsKey(operandOne))
             {
@@ -732,12 +736,15 @@ namespace ProjectSQ.Services
                 SetCompareFlags(valueOperandOne, valueOperandTwo);
                 return true;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
         public bool Jump(string label)
         {
-            for (ushort index = 0; index < Memory.instructionsNumber; index++)
-                if (Memory.internalMemory[index].Split(' ')[0] == "label" && Memory.internalMemory[index].Split(' ')[1] == label)
+            CustomAssert.IsTrue(Memory.internalMemory != null, "Precondition failed: Memory.internalMemory is not initialized");
+            CustomAssert.IsTrue(Memory.instructionsNumber != null, "Precondition failed: Memory.instructionsNumber is not initialized");
+            for (ushort index = 0; index < Memory.internalMemory.Length; index++)
+                if (Memory.internalMemory[index].Split(' ')[1] == label && Memory.internalMemory[index].Split(' ')[0] == "label")
                 {
                     Memory.currentInstruction = index;
                     return true;
@@ -747,61 +754,73 @@ namespace ProjectSQ.Services
 
         public bool JumpIfEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.Equal != null, "Precondition failed: Processor.Equal is not initialized");
             if (Processor.Equal)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfNotEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.NotEqual != null, "Precondition failed: Processor.NotEqual is not initialized");
             if (Processor.NotEqual)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfLessThan(string label)
         {
+            CustomAssert.IsTrue(Processor.Less != null, "Precondition failed: Processor.Less is not initialized");
             if (Processor.Less)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfGreaterThan(string label)
         {
+            CustomAssert.IsTrue(Processor.Greater != null, "Precondition failed: Processor.Greater is not initialized");
             if (Processor.Greater)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfLessThanOrEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.LessEqual != null, "Precondition failed: Processor.LessEqual is not initialized");
             if (Processor.LessEqual)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
         public bool JumpIfGreaterThanOrEqual(string label)
         {
+            CustomAssert.IsTrue(Processor.GreaterEqual != null, "Precondition failed: Processor.GreaterEqual is not initialized");
             if (Processor.GreaterEqual)
             {
                 bool res = Jump(label);
                 return res;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
             return false;
         }
 
@@ -1009,7 +1028,7 @@ namespace ProjectSQ.Services
             byte lowByte = Memory.programData[index];
             byte highByte = Memory.programData[index + 1];
             ushort result = (ushort)((highByte << 8) | lowByte);
-            
+
             //postconditions
             CustomAssert.IsTrue(result == (ushort)((Memory.programData[index + 1] << 8) | Memory.programData[index]), "Postcondition failed: The memory location was not read");
             return result;
@@ -1119,6 +1138,9 @@ namespace ProjectSQ.Services
                 Processor.Less = true;
                 Processor.Greater = false;
 
+                CustomAssert.IsTrue(Processor.LessEqual & Processor.NotEqual & Processor.Less == true &&
+                                    !Processor.Equal & !Processor.GreaterEqual & !Processor.Greater == true, "Postcondition failed: Flag error");
+
                 return;
             }
             if (operandValueOne > operandValueTwo)
@@ -1130,7 +1152,11 @@ namespace ProjectSQ.Services
                 Processor.NotEqual = true;
                 Processor.Less = false;
                 Processor.Greater = true;
+                CustomAssert.IsTrue(Processor.GreaterEqual & Processor.NotEqual & Processor.Greater == true &&
+                                    !Processor.Equal & !Processor.LessEqual & !Processor.Less == true, "Postcondition failed: Flag error");
+                return;
             }
+            CustomAssert.IsTrue(true, "No post condition here");
         }
 
         [GeneratedRegex(@"^\d+$")]

@@ -71,6 +71,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -89,6 +90,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -107,6 +109,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -125,6 +128,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -143,6 +147,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -161,6 +166,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -179,6 +185,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -197,6 +204,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -215,6 +223,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -233,6 +242,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -251,6 +261,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeTrue();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
 
         [Fact]
@@ -269,6 +280,7 @@ namespace ProjectSQ.Tests.ProcessorServiceTests
             // Assert
             result.Should().BeFalse();
             Memory.currentInstruction.Should().Be(expectedInstructionIndex);
+            _processorService.ResetData();
         }
     }
 }
