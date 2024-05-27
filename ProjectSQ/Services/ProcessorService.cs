@@ -823,42 +823,96 @@ namespace ProjectSQ.Services
         }
         public void Call(string functionName)
         {
+            // Precondition: Validate Processor and Memory states before Call operation
+            CustomAssert.IsTrue(Processor.StackPointer < Memory.endStack, "Precondition failed: Processor.StackPointer must be lower than Memory.endStack");
+            CustomAssert.IsTrue(Memory.internalMemory != null, "Precondition failed: Memory.internalMemory is not initialized");
+            CustomAssert.IsTrue(Memory.instructionsNumber >= 0, "Precondition failed: Memory.instructionsNumber must be greater than zero");
+            CustomAssert.IsTrue(!string.IsNullOrEmpty(functionName), "Precondition failed: functionName must not be null or empty");
+
             WriteValueToMemory(Processor.StackPointer, Memory.currentInstruction);
             Processor.StackPointer += 2;
+
+            bool functionFound = false;
             for (ushort index = 0; index < Memory.instructionsNumber; index++)
-                if (Memory.internalMemory[index].Split(' ')[0] == "function" && Memory.internalMemory[index].Split(' ')[1] == functionName)
+            {
+                // Loop invariant: Ensure index is within bounds
+                CustomAssert.IsTrue(index >= 0 && index < Memory.instructionsNumber, "Invariant failed: Index is out of bounds");
+
+                if (Memory.internalMemory[index].Split(' ')[0] == "function" &&
+                    Memory.internalMemory[index].Split(' ')[1] == functionName)
                 {
                     Memory.currentInstruction = index;
+                    functionFound = true;
                     break;
                 }
+            }
+
+            CustomAssert.IsTrue(functionFound, $"Precondition failed: Function {functionName} not found");
+
+            // Postcondition: Validate Processor and Memory states after Call operation
+            CustomAssert.IsTrue(Processor.StackPointer <= Memory.endStack, "Postcondition failed: Processor.StackPointer must be lower than or equal to Memory.endStack");
+            CustomAssert.IsTrue(Memory.currentInstruction >= 0 && Memory.currentInstruction < Memory.instructionsNumber, "Postcondition failed: Memory.currentInstruction is out of bounds after Call operation");
+
 
         }
         public void Return()
         {
+            // Precondition: Validate Processor and Memory states before Return operation
+            CustomAssert.IsTrue(Processor.StackPointer <= Memory.endStack, "Precondition failed: Processor.StackPointer must be lower than or equal to Memory.endStack");
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+
             Processor.StackPointer -= 2;
+
+            ushort returnAddress = ReadValueFromMemory(Processor.StackPointer);
+            CustomAssert.IsTrue(returnAddress >= 0 && returnAddress < Memory.instructionsNumber, "Precondition failed: Return address is out of bounds");
+
             Memory.currentInstruction = ReadValueFromMemory(Processor.StackPointer);
             Memory.programData[Processor.StackPointer] = 0;
             Memory.programData[Processor.StackPointer + 1] = 0;
+
+            // Postcondition: Validate Processor and Memory states after Return operation
+            CustomAssert.IsTrue(Memory.currentInstruction >= 0 && Memory.currentInstruction < Memory.instructionsNumber, "Postcondition failed: Memory.currentInstruction is out of bounds after Return operation");
+            CustomAssert.IsTrue(Memory.programData[Processor.StackPointer] == 0 && Memory.programData[Processor.StackPointer + 1] == 0, "Postcondition failed: Memory.programData at stack pointer was not cleared");
+            CustomAssert.IsTrue(Processor.StackPointer < Memory.endStack, "Postcondition failed: Processor.StackPointer must be lower than Memory.endStack");
         }
         public void Read(string operand)
         {
+            // Precondition: Validate Processor and Memory states before Read operation
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            CustomAssert.IsTrue(Memory.programData != null, "Precondition failed: Memory.programData is not initialized");
+            CustomAssert.IsTrue(Memory.currentIndexMemoryVideo >= 0 && Memory.currentIndexMemoryVideo < Memory.programData.Length, "Precondition failed: Memory.currentIndexMemoryVideo is out of bounds");
+            CustomAssert.IsTrue(!string.IsNullOrEmpty(operand), "Precondition failed: operand must not be null or empty");
 
             this.hubContext.Clients.All.SendAsync("ReadOpearion");
 
             ushort result = 0;
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] != ' ')
             {
+                // Loop invariant: Ensure the current index is within bounds
+                CustomAssert.IsTrue(Memory.currentIndexMemoryVideo < Memory.programData.Length, "Invariant failed: Memory.currentIndexMemoryVideo is out of bounds during reading digits");
                 result = (ushort)(result * 10 + ((char)(Memory.programData[Memory.currentIndexMemoryVideo]) - '0'));
                 Memory.currentIndexMemoryVideo++;
             }
             while ((char)Memory.programData[Memory.currentIndexMemoryVideo] == ' ')
             {
+                CustomAssert.IsTrue(Memory.currentIndexMemoryVideo < Memory.programData.Length, "Invariant failed: Memory.currentIndexMemoryVideo is out of bounds during reading spaces");
                 Memory.currentIndexMemoryVideo++;
             }
+            // Postcondition: Validate the result of the Read operation
+            CustomAssert.IsTrue(Processor.registerDictionary.ContainsKey(operand), $"Postcondition failed: Processor.registerDictionary does not contain the key {operand}");
             Processor.registerDictionary[operand] = result;
+            CustomAssert.IsTrue(Processor.registerDictionary[operand] == result, "Postcondition failed: The register was not correctly set");
         }
         public ResultRegisters LoadResultRegisters()
         {
+            // Precondition: Validate Processor state before loading result registers
+            CustomAssert.IsTrue(Processor.registerDictionary != null, "Precondition failed: Processor.registerDictionary is not initialized");
+            string[] expectedRegisters = { "reg1", "reg2", "reg3", "reg4", "reg5", "reg6", "reg7", "reg8" };
+            foreach (string registerName in expectedRegisters)
+            {
+                CustomAssert.IsTrue(Processor.registerDictionary.ContainsKey(registerName), $"Precondition failed: Processor.registerDictionary does not contain the key {registerName}");
+            }
+
             ResultRegisters resultRegisters = new ResultRegisters();
             resultRegisters.Reg1 = Processor.registerDictionary["reg1"];
             resultRegisters.Reg2 = Processor.registerDictionary["reg2"];
@@ -868,8 +922,20 @@ namespace ProjectSQ.Services
             resultRegisters.Reg6 = Processor.registerDictionary["reg6"];
             resultRegisters.Reg7 = Processor.registerDictionary["reg7"];
             resultRegisters.Reg8 = Processor.registerDictionary["reg8"];
+
+            // Postcondition: Validate the state of the loaded result registers
+            CustomAssert.IsTrue(resultRegisters.Reg1 == Processor.registerDictionary["reg1"], "Postcondition failed: resultRegisters.Reg1 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg2 == Processor.registerDictionary["reg2"], "Postcondition failed: resultRegisters.Reg2 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg3 == Processor.registerDictionary["reg3"], "Postcondition failed: resultRegisters.Reg3 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg4 == Processor.registerDictionary["reg4"], "Postcondition failed: resultRegisters.Reg4 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg5 == Processor.registerDictionary["reg5"], "Postcondition failed: resultRegisters.Reg5 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg6 == Processor.registerDictionary["reg6"], "Postcondition failed: resultRegisters.Reg6 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg7 == Processor.registerDictionary["reg7"], "Postcondition failed: resultRegisters.Reg7 was not correctly set");
+            CustomAssert.IsTrue(resultRegisters.Reg8 == Processor.registerDictionary["reg8"], "Postcondition failed: resultRegisters.Reg8 was not correctly set");
+
             return resultRegisters;
         }
+
         public void ResetData()
         {
             Processor.InitProcessor();
