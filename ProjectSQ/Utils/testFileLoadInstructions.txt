@@ -1,0 +1,3 @@
+main
+mov reg1,5,
+add reg1,10
